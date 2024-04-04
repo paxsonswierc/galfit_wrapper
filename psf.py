@@ -1,11 +1,13 @@
 # Base class for PSF
 from astropy.io import fits
+import os
 import pyds9
 import pyregion
 import numpy as np
 import math
 from region_to_psf import input_to_galfit
 import subprocess
+import shutil
 
 class PSF():
 
@@ -44,6 +46,7 @@ class PSF():
         d.set('region delete select')
 
         subprocess.run(['/bin/bash', '-c', self.galfit_path+" "+output_config])
+        os.remove('galfit.01')
 
         print("galfit run done, loading into DS9...")
         d.set("mecube new "+output_fits)
@@ -75,17 +78,34 @@ class PSF():
         pass
 
     def visualize(self, d):
-        if self.config_output_file is None:
+        if self.config_output_file is None and self.model_file is None:
             print('Please upload or create psf model first')
-        else:
+        elif self.config_output_file is not None:
             d.set("mecube new "+ self.config_output_file)
             d.set("scale mode minmax")
             d.set("mode none")
             d.set("zoom to fit")
             d.set("cube play")
+        elif self.model_file is not None:
+            d.set("fits new "+ self.model_file)
+            d.set("scale mode minmax")
+            d.set("mode none")
+            d.set("zoom to fit")
 
-    def upload_psf(self, d):
-        pass
+    def upload_psf(self, filename):
+        hdul = fits.open(filename)
+
+        output_fits = self.ouput_dir + self.target_filename + '_psf.fits'
+        output_model = self.ouput_dir + self.target_filename + '_psf_model.fits'
+
+        if len(hdul) == 1:
+            shutil.copyfile(filename, output_model)
+        else:
+            shutil.copyfile(filename, output_fits)
+            self.config_output_file = output_fits
+            data = hdul[2].data
+            fits.writeto(output_model, data, overwrite=True)
+        self.model_file = output_model
 
     def set_model(self):
         pass

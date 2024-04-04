@@ -9,8 +9,9 @@ from utils import get_paths, my_filebrowser
 
 def take_action(action):
     actions = {'help': help,
-               'psf write config': psf_write_config,
+               'psf create': psf_write_config,
                'psf visualize': psf_visualize,
+               'psf upload': psf_upload,
                'target visualize': visualize_target,
                'mult fits': mult_fits}
     if action not in actions:
@@ -48,6 +49,10 @@ def psf_write_config():
 def psf_visualize():
     psf.visualize(d)
 
+def psf_upload():
+    psf_file = my_filebrowser()
+    psf.upload_psf(psf_file)
+
 def visualize_target():
     d.set("fits new "+target_path)
     d.set("scale mode 99.5")
@@ -70,32 +75,32 @@ if __name__ == '__main__':
     target_filename = target_path.split('/')[-1][:-5]
     path_to_output += target_filename + '/'
 
-    if os.path.exists(path_to_output + target_filename + '/'):
+    if os.path.exists(path_to_output + '/'):
         #TODO auto load everything in
-        files = os.listdir(path_to_output + target_filename + '/')
+        files = os.listdir(path_to_output + '/')
         config_file = None
         config_output_file = None
         model_file = None
         mask = None
         for file in files:
             if file == target_filename + '_psf_config.txt':
-                config_file = path_to_output + target_filename + '/' + file
+                config_file = path_to_output + file
 
             if file == target_filename + '_psf.fits':
-                config_output_file = path_to_output + target_filename + '/' + file
+                config_output_file = path_to_output + file
     
             if file == target_filename + '_psf_model.fits':
-                model_file = path_to_output + target_filename + '/' + file
+                model_file = path_to_output + file
 
             if file == target_filename + '_psf_mask.fits':
-                mask = path_to_output + target_filename + '/' + file
+                mask = path_to_output + file
 
         psf = PSF('?', target_path, path_to_output, path_to_galfit,
                   target_filename, config_file,
                   config_output_file, model_file, mask)
         sersic = Sersic('?')
     else:
-        os.mkdir(path_to_output + target_filename + '/')
+        os.mkdir(path_to_output + '/')
         psf = PSF('?', target_path, path_to_output, path_to_galfit,
                   target_filename)
         sersic = Sersic('?')

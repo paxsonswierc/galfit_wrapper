@@ -62,3 +62,78 @@ Output image    : /Users/pswierc/galfit_outputs/r_band/r_band_psf.fits
  Chi^2/nu = 0.766 
 
 -----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /Users/pswierc/field_course/data/r_band.fits[217:254,416:452] 
+Init. par. file : /Users/pswierc/galfit_outputs/r_band/r_band_psf_config.txt 
+Restart file    : galfit.05 
+Output image    : /Users/pswierc/galfit_outputs/r_band/r_band_psf.fits 
+
+ sky       : [235.50, 434.00]     2.98  [0.00e+00]  [0.00e+00]
+                                  1.02  [0.00e+00]  [0.00e+00]
+ moffat    : (  235.33,   431.84)   21.88      5.15    5.40    0.85    17.98
+             (    0.05,     0.06)    0.03      1.18    2.05    0.02     6.67
+ Chi^2 = 1452.51414,  ndof = 1398
+ Chi^2/nu = 1.039 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /Users/pswierc/field_course/data/r_band.fits[219:252,415:447] 
+Init. par. file : /Users/pswierc/galfit_outputs/r_band/_psf_config.txt 
+Restart file    : galfit.06 
+Output image    : /Users/pswierc/galfit_outputs/r_band/_psf.fits 
+
+ sky       : [235.50, 431.00]     4.36  [0.00e+00]  [0.00e+00]
+                                  1.18  [0.00e+00]  [0.00e+00]
+ moffat    : (  235.33,   431.84)   21.90      5.17    6.37    0.85    17.82
+             (    0.05,     0.06)    0.03      1.42    2.98    0.02     6.68
+ Chi^2 = 1125.12366,  ndof = 1114
+ Chi^2/nu = 1.010 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /Users/pswierc/field_course/data/r_band.fits[217:251,416:449] 
+Init. par. file : /Users/pswierc/galfit_outputs/r_band/_psf_config.txt 
+Restart file    : galfit.07 
+Output image    : /Users/pswierc/galfit_outputs/r_band/_psf.fits 
+
+ sky       : [234.00, 432.50]     4.46  [0.00e+00]  [0.00e+00]
+                                  1.14  [0.00e+00]  [0.00e+00]
+ moffat    : (  235.33,   431.84)   21.90      5.17    6.24    0.85    17.82
+             (    0.05,     0.06)    0.03      1.38    2.84    0.02     6.69
+ Chi^2 = 1205.55574,  ndof = 1182
+ Chi^2/nu = 1.020 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /Users/pswierc/field_course/data/r_band.fits[218:253,417:449] 
+Init. par. file : /Users/pswierc/galfit_outputs/r_band/r_band_psf_config.txt 
+Restart file    : galfit.08 
+Output image    : /Users/pswierc/galfit_outputs/r_band/r_band_psf.fits 
+
+ sky       : [235.50, 433.00]     3.98  [0.00e+00]  [0.00e+00]
+                                  1.14  [0.00e+00]  [0.00e+00]
+ moffat    : (  235.33,   431.84)   21.90      5.16    6.00    0.85    17.87
+             (    0.05,     0.06)    0.03      1.33    2.61    0.02     6.69
+ Chi^2 = 1201.10639,  ndof = 1180
+ Chi^2/nu = 1.018 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /Users/pswierc/field_course/data/r_band.fits[252:286,325:357] 
+Init. par. file : /Users/pswierc/galfit_outputs/r_band/r_band_psf_config.txt 
+Restart file    : galfit.01 
+Output image    : /Users/pswierc/galfit_outputs/r_band/r_band_psf.fits 
+
+ sky       : [269.00, 341.00]     3.86  [0.00e+00]  [0.00e+00]
+                                  0.99  [0.00e+00]  [0.00e+00]
+ moffat    : (  267.59,   340.98)   22.52      5.37    3.08    0.76   -48.26
+             (    0.09,     0.08)    0.10      1.51    1.26    0.04     7.81
+ Chi^2 = 1196.81507,  ndof = 1147
+ Chi^2/nu = 1.043 
+
+-----------------------------------------------------------------------------
