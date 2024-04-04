@@ -10,6 +10,8 @@ from utils import get_paths, my_filebrowser
 def take_action(action):
     actions = {'help': help,
                'psf write config': psf_write_config,
+               'psf visualize': psf_visualize,
+               'target visualize': visualize_target,
                'mult fits': mult_fits}
     if action not in actions:
         print('Unkown command. Type help for assistance')
@@ -43,6 +45,13 @@ def help():
 def psf_write_config():
     psf.write_config(d)
 
+def psf_visualize():
+    psf.visualize(d)
+
+def visualize_target():
+    d.set("fits new "+target_path)
+    d.set("scale mode 99.5")
+
 def mult_fits():
     data, header = fits.getdata(target_path, header=True)
     header['EXPTIME'] = 1.0
@@ -62,11 +71,34 @@ if __name__ == '__main__':
     path_to_output += target_filename + '/'
 
     if os.path.exists(path_to_output + target_filename + '/'):
-        pass #TODO auto load everything in
-        psf = PSF('?', target_path, path_to_output, target_filename)
+        #TODO auto load everything in
+        files = os.listdir(path_to_output + target_filename + '/')
+        config_file = None
+        config_output_file = None
+        model_file = None
+        mask = None
+        for file in files:
+            if file == target_filename + '_psf_config.txt':
+                config_file = path_to_output + target_filename + '/' + file
+
+            if file == target_filename + '_psf.fits':
+                config_output_file = path_to_output + target_filename + '/' + file
+    
+            if file == target_filename + '_psf_model.fits':
+                model_file = path_to_output + target_filename + '/' + file
+
+            if file == target_filename + '_psf_mask.fits':
+                mask = path_to_output + target_filename + '/' + file
+
+        psf = PSF('?', target_path, path_to_output, path_to_galfit,
+                  target_filename, config_file,
+                  config_output_file, model_file, mask)
         sersic = Sersic('?')
     else:
         os.mkdir(path_to_output + target_filename + '/')
+        psf = PSF('?', target_path, path_to_output, path_to_galfit,
+                  target_filename)
+        sersic = Sersic('?')
 
     software_open = True
 
