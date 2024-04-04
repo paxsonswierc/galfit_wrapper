@@ -1,42 +1,16 @@
 # $HOME/galfit/galfit
 # $HOME/galfit_outputs
-from tkinter import Tk
-from tkinter.filedialog import askopenfilename, askdirectory 
 import os
+import pyds9
+from astropy.io import fits
 from psf import PSF
 from sersic import Sersic
-
-def get_paths():
-    paths_file = open('path_config.txt')
-    paths = paths_file.readlines()
-
-    if len(paths) == 0:
-        write_path_config()
-        paths_file = open('path_config.txt')
-        paths = paths_file.readlines()
-
-    path_to_galfit = paths[0][:-1]
-    path_to_output = paths[1]
-
-    for i in range(len(path_to_galfit)):
-        if path_to_galfit[-1*i - 1] == '/':
-            galfit_output = path_to_galfit[:-i]
-            break
-    
-    if path_to_output[-1] != '/':
-        path_to_output += '/'
-
-    return path_to_galfit, path_to_output, galfit_output
-
-def write_path_config():
-    path_to_galfit = input('Path to your galfit executable? > ')
-    path_to_output = input('Folder you would like to save outputs > ')
-    paths_file = open('path_config.txt', 'w')
-    paths_file.write(path_to_galfit + '\n' + path_to_output)
-    paths_file.close()
+from utils import get_paths, my_filebrowser
 
 def take_action(action):
-    actions = {'help': help}
+    actions = {'help': help,
+               'psf write config': psf_write_config,
+               'mult fits': mult_fits}
     if action not in actions:
         print('Unkown command. Type help for assistance')
     else:
@@ -66,14 +40,15 @@ def help():
     '''
     print(text)
 
-def my_filebrowser():
-    root = Tk()
-    root.withdraw()
-    filename = askopenfilename()
-    # print(type(filename))
-    # root.quit()
-    # root.destroy()
-    return filename
+def psf_write_config():
+    psf.write_config(d)
+
+def mult_fits():
+    data, header = fits.getdata(target_path, header=True)
+    header['EXPTIME'] = 1.0
+    header['GAIN'] = 1.0
+    data = data*10000
+    fits.writeto(target_path, data, header, overwrite=True)
 
 if __name__ == '__main__':
     path_to_galfit, path_to_output, galfit_output = get_paths()
@@ -84,26 +59,28 @@ if __name__ == '__main__':
         quit()
 
     target_filename = target_path.split('/')[-1][:-5]
+    path_to_output += target_filename + '/'
 
     if os.path.exists(path_to_output + target_filename + '/'):
         pass #TODO auto load everything in
-        psf = PSF('?')
+        psf = PSF('?', target_path, path_to_output, target_filename)
         sersic = Sersic('?')
     else:
         os.mkdir(path_to_output + target_filename + '/')
-
-    path_to_output += target_filename + '/'
 
     software_open = True
 
     print('Welcome to galfit wrapper. Type help for assistance')
 
-    test = my_filebrowser()
+    #test = my_filebrowser()
+    d = pyds9.DS9()
+    d.set("fits new "+target_path)
+    d.set("scale mode 99.5")
 
     while software_open == True:
-        print(test, target_path)
         action = input(' > ')
         if action == ('quit'):
             software_open = False
+            d.set('exit')
         else:
             take_action(action)
