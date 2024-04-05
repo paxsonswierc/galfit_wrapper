@@ -9,7 +9,7 @@ import sep
 
 # function for fits file and regions -> galfit file, for both psf and normal galfit
 def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
-                    mask_file, psf_file, pre_box):
+                    mask_file, psf_file, pre_box, pre_mags):
   
     #mask_file = 'none'
     # creates lines for sky component
@@ -163,6 +163,7 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
         if points == 0:
             print("must provide at least one point region for PSF!")
     else:
+        sersic_count = 0
         for region in regions:
             if region.__dict__['exclude']:
                 region.__dict__['exclude'] = False
@@ -199,7 +200,11 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
                 small_regions_mask_mag = pyregion.get_mask([region], fits_data).astype(int)
                 sum_pixels = (np.sum(fits_data * small_regions_mask_mag)) * 2
                 zeropoint = zpt
-                magnitude = (-2.5 * math.log10(sum_pixels)) + zeropoint
+                if pre_mags and (sersic_count+1) <= len(pre_mags):
+                    magnitude = pre_mags[sersic_count]
+                    sersic_count += 1
+                else:
+                    magnitude = (-2.5 * math.log10(sum_pixels)) + zeropoint
                 component_regions.append(create_sersic_component(component_number, x, y, a, b, angle, magnitude))
                 component_number += 1 
             elif region.name == 'circle':

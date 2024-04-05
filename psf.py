@@ -40,7 +40,7 @@ class PSF():
         output_mask = self.ouput_dir + self.target_filename + '_psf_mask.fits'
 
         input_to_galfit(self.target_file, True, psf_regions, 32.5,
-                        output_config, output_fits, output_mask, 'none', False)
+                        output_config, output_fits, output_mask, 'none', False, False)
 
         d.set('region select all')
         d.set('region delete select')

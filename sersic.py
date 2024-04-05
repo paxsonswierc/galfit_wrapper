@@ -46,7 +46,7 @@ class Sersic():
 
             input_to_galfit(self.target_file, False, regions, 32.5,
                             self.config_file, output_fits, output_mask,
-                            self.psf.model_file, False)
+                            self.psf.model_file, False, False)
 
             d.set('region select all')
             d.set('region delete select')
@@ -62,7 +62,7 @@ class Sersic():
             d.set("fits new "+self.target_file)
             d.set("scale mode 99.5")
             d.set("mode region")
-            box = self.config_to_region(d)
+            box, mags = self.config_to_region(d)
             d.set("region shape ellipse")
             input('Make any wanted changes. Hit enter to optimize')
 
@@ -74,7 +74,7 @@ class Sersic():
 
             input_to_galfit(self.target_file, False, regions, 32.5,
                             self.config_file, output_fits, output_mask,
-                            self.psf.model_file, box)
+                            self.psf.model_file, box, mags)
 
             self.optimize_config(d)
 
@@ -159,7 +159,7 @@ class Sersic():
             self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
             if file != self.config_file:
                 shutil.copyfile(file, self.config_file)
-            box = self.config_to_region(d)
+            box, mags = self.config_to_region(d)
 
             regions = d.get("region")
 
@@ -169,7 +169,7 @@ class Sersic():
 
             input_to_galfit(self.target_file, False, regions, 32.5,
                             self.config_file, output_fits, output_mask,
-                            self.psf.model_file, box)
+                            self.psf.model_file, box, mags)
 
     def upload_model(self, file):
         self.config_output_file = self.ouput_dir + self.target_filename + '_config.txt'
@@ -181,7 +181,7 @@ class Sersic():
 
         d.set("fits new "+self.target_file)
         d.set("scale mode 99.5")
-
+        magnitudes = []
         config = open(self.config_file, 'r')
         lines = config.readlines()
 
@@ -192,6 +192,9 @@ class Sersic():
                     if '1)' in component_line:
                         x = float(words[1])
                         y = float(words[2])
+                    elif '3)' in component_line:
+                        magnitudes.append(float(words[1]))
+
                     elif '4) ' in component_line and '=4)' not in component_line:
                         a = float(words[1])
                     elif '9)' in component_line:
@@ -228,4 +231,4 @@ class Sersic():
 
         config.close()
 
-        return [x_min, x_max, y_min, y_max, x_center, y_center]
+        return [x_min, x_max, y_min, y_max, x_center, y_center], magnitudes
