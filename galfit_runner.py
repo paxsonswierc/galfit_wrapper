@@ -67,7 +67,7 @@ def sersic_edit_config():
 
 def sersic_upload_config():
     config_file = my_filebrowser()
-    sersic.upload_config(config_file)
+    sersic.upload_config(config_file, d)
 
 def sersic_upload_model():
     model_file = my_filebrowser()
@@ -89,7 +89,7 @@ def mult_fits():
 if __name__ == '__main__':
     ds9_commands = ['target visualize', 'psf create', 'psf visualize',
                     'sersic create config', 'sersic edit config',
-                    'sersic optimize config', 'sersic visualize']
+                    'sersic optimize config', 'sersic visualize', 'sersic upload config']
 
     path_to_galfit, path_to_output, galfit_output = get_paths()
 

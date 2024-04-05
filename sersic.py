@@ -46,7 +46,7 @@ class Sersic():
 
             input_to_galfit(self.target_file, False, regions, 32.5,
                             self.config_file, output_fits, output_mask,
-                            self.psf.model_file)
+                            self.psf.model_file, False)
 
             d.set('region select all')
             d.set('region delete select')
@@ -61,9 +61,21 @@ class Sersic():
         else:
             d.set("fits new "+self.target_file)
             d.set("scale mode 99.5")
-            self.config_to_region(d)
+            d.set("mode region")
+            box = self.config_to_region(d)
             d.set("region shape ellipse")
             input('Make any wanted changes. Hit enter to optimize')
+
+            regions = d.get("region")
+
+            self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
+            output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
+            output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
+
+            input_to_galfit(self.target_file, False, regions, 32.5,
+                            self.config_file, output_fits, output_mask,
+                            self.psf.model_file, box)
+
             self.optimize_config(d)
 
     def edit_config_text(self):
@@ -140,10 +152,24 @@ class Sersic():
             d.set("zoom to fit")
             d.set("cube play")
 
-    def upload_config(self, file):
-        self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
-        if file != self.config_file:
-            shutil.copyfile(file, self.config_file)
+    def upload_config(self, file, d):
+        if self.psf.model_file is None:
+            print('Please create or upload psf first')
+        else:
+            self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
+            if file != self.config_file:
+                shutil.copyfile(file, self.config_file)
+            box = self.config_to_region(d)
+
+            regions = d.get("region")
+
+            self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
+            output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
+            output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
+
+            input_to_galfit(self.target_file, False, regions, 32.5,
+                            self.config_file, output_fits, output_mask,
+                            self.psf.model_file, box)
 
     def upload_model(self, file):
         self.config_output_file = self.ouput_dir + self.target_filename + '_config.txt'
@@ -152,6 +178,9 @@ class Sersic():
 
     def config_to_region(self, d):
         assert self.config_file is not None
+
+        d.set("fits new "+self.target_file)
+        d.set("scale mode 99.5")
 
         config = open(self.config_file, 'r')
         lines = config.readlines()
@@ -186,5 +215,17 @@ class Sersic():
                     if '0)' in component_line or component_line == lines[-1]:
                         d.set(f'region command "point {x} {y}"')
                         break
+            if 'H)' in line:
+                words = line.split()
+                x_min = int(words[1])
+                x_max = int(words[2])
+                y_min = int(words[3])
+                y_max = int(words[4])
+            if 'I)' in line:
+                words = line.split()
+                x_center = int(words[1])
+                y_center = int(words[2])
 
         config.close()
+
+        return [x_min, x_max, y_min, y_max, x_center, y_center]

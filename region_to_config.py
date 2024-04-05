@@ -9,7 +9,8 @@ import sep
 
 # function for fits file and regions -> galfit file, for both psf and normal galfit
 def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
-                    mask_file, psf_file):
+                    mask_file, psf_file, pre_box):
+  
     #mask_file = 'none'
     # creates lines for sky component
     def create_sky_component(component_number, fits_data):
@@ -84,6 +85,18 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
     fits_data = hdulist_fits[0].data
     header = hdulist_fits[0].header
     hdulist_fits.close()
+
+    if pre_box:
+        ps_x,ps_y = 3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5,3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5
+        info_lines = [
+            f"H) {pre_box[0]} {pre_box[1]} {pre_box[2]} {pre_box[3]}",
+            f"I) {pre_box[4]} {pre_box[5]}",
+            f"J) {zpt}",
+            f"K) {ps_x} {ps_y}",
+            "O) regular",
+            "P) 0",
+            "\n"
+        ]
 
     # initializes the components and masks
     component_regions = []
@@ -179,6 +192,10 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
                     else:
                         angle += 90
                     a,b = b,a
+                if b == 0:
+                    b = 1
+                if a == 0:
+                    a = 1
                 small_regions_mask_mag = pyregion.get_mask([region], fits_data).astype(int)
                 sum_pixels = (np.sum(fits_data * small_regions_mask_mag)) * 2
                 zeropoint = zpt
