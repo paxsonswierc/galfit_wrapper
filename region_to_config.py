@@ -9,7 +9,8 @@ import sep
 
 # function for fits file and regions -> galfit file, for both psf and normal galfit
 def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
-                    mask_file):
+                    mask_file, psf_file):
+    #mask_file = 'none'
     # creates lines for sky component
     def create_sky_component(component_number, fits_data):
         sky_level = np.median(fits_data)
@@ -49,7 +50,7 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
             "0) sersic",
             f"1) {x} {y} 1 1",
             f"3) {magnitude} 1",
-            f"4) {max(a, b)} 1",
+            f"4) {a} 1",
             "5) 2 1",
             f"9) {b/a} 1",
             f"10) {(angle + 90) % 360} 1"
@@ -59,14 +60,6 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
 
 
     # define names of files, then create lines
-    if psf:
-    #     output_file = str(fits_file[fits_file.rfind('/')+1:fits_file.rfind('.')]+'_psf.galfit')
-    #     output_fits = str(fits_file[fits_file.rfind('/')+1:fits_file.rfind('.')]+'_psf.fits')
-        psf_file = 'none'
-    else:
-    #     output_fits = str(fits_file[fits_file.rfind('/')+1:fits_file.rfind('.')]+'_gf.fits')
-    #     output_file = str(fits_file[fits_file.rfind('/')+1:fits_file.rfind('.')]+'.galfit')
-        psf_file = str(fits_file[fits_file.rfind('/')+1:fits_file.rfind('.')]+'_psf_model.fits')
     sigma_file = 'none'
     psfSampling = 1
     #mask_file = 'mask.fits'

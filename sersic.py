@@ -38,14 +38,15 @@ class Sersic():
             input('Place point for point sources. Hit enter when region is placed\n')
             d.set("region shape box")
             input('Place box for frame. Hit enter when region is placed\n')
-            psf_regions = d.get("region")
+            regions = d.get("region")
 
             self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
             output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
 
-            input_to_galfit(self.target_file, False, psf_regions, 32.5,
-                            self.config_file, output_fits, output_mask)
+            input_to_galfit(self.target_file, False, regions, 32.5,
+                            self.config_file, output_fits, output_mask,
+                            self.psf.model_file)
 
             d.set('region select all')
             d.set('region delete select')
