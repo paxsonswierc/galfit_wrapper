@@ -13,6 +13,9 @@ def take_action(action):
                'psf visualize': psf_visualize,
                'psf upload': psf_upload,
                'target visualize': visualize_target,
+               'sersic create config': sersic_create_config,
+               'sersic upload config': sersic_upload_config,
+               'sersic optimize config': sersic_optimize,
                'mult fits': mult_fits}
     if action not in actions:
         print('Unkown command. Type help for assistance')
@@ -23,23 +26,20 @@ def help():
     text = '''
     Commands:
     quit
-    
-    
-    TODO
-    psf
-        upload config
-        upload finished model
-        create config
-        edit config (direct/galfit)
-        optimize config
-        visualize
-    sersic
-        upload psf
-        upload config
-        create config
-        edit config (direct/galfit)
-        optimize config
-        visualize
+
+    target visualize
+
+    psf create
+    psf visualize
+    psf upload
+
+    sersic create config
+    sersic edit config
+    sersic edit config text
+    sersic optimize config
+    sersic visualize
+    sersic upload config
+    sersic upload model
     '''
     print(text)
 
@@ -56,6 +56,16 @@ def psf_upload():
 def visualize_target():
     d.set("fits new "+target_path)
     d.set("scale mode 99.5")
+
+def sersic_create_config():
+    sersic.create_config(d)
+
+def sersic_upload_config():
+    config_file = my_filebrowser()
+    sersic.upload_config(config_file)
+
+def sersic_optimize():
+    sersic.optimize_config(d)
 
 def mult_fits():
     data, header = fits.getdata(target_path, header=True)
@@ -78,32 +88,40 @@ if __name__ == '__main__':
     if os.path.exists(path_to_output + '/'):
         #TODO auto load everything in
         files = os.listdir(path_to_output + '/')
-        config_file = None
-        config_output_file = None
-        model_file = None
-        mask = None
+        psf_config_file = None
+        psf_config_output_file = None
+        psf_model_file = None
+        psf_mask = None
+        sersic_config_file = None
         for file in files:
             if file == target_filename + '_psf_config.txt':
-                config_file = path_to_output + file
+                psf_config_file = path_to_output + file
 
             if file == target_filename + '_psf.fits':
-                config_output_file = path_to_output + file
+                psf_config_output_file = path_to_output + file
     
             if file == target_filename + '_psf_model.fits':
-                model_file = path_to_output + file
+                psf_model_file = path_to_output + file
 
             if file == target_filename + '_psf_mask.fits':
-                mask = path_to_output + file
+                psf_mask = path_to_output + file
+
+            if file == target_filename + '_config.txt':
+                sersic_config_file = path_to_output + file
 
         psf = PSF('?', target_path, path_to_output, path_to_galfit,
-                  target_filename, config_file,
-                  config_output_file, model_file, mask)
-        sersic = Sersic('?')
+                  target_filename, psf_config_file,
+                  psf_config_output_file, psf_model_file, psf_mask)
+        sersic = Sersic('?', target_path, path_to_output, path_to_galfit,
+                  target_filename, sersic_config_file,
+                  None, None, psf)
     else:
         os.mkdir(path_to_output + '/')
         psf = PSF('?', target_path, path_to_output, path_to_galfit,
                   target_filename)
-        sersic = Sersic('?')
+        sersic = Sersic('?', target_path, path_to_output, path_to_galfit,
+                  target_filename, None,
+                  None, None, psf)
 
     software_open = True
 

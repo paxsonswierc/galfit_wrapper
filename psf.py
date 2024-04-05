@@ -68,15 +68,6 @@ class PSF():
 
         self.model_file = output_model
 
-    def edit_confit(self, d):
-        assert self.config_file is not None
-
-    def alter_config(self, d):
-        assert self.config_file is not None
-
-    def optimize_config(self):
-        pass
-
     def visualize(self, d):
         if self.config_output_file is None and self.model_file is None:
             print('Please upload or create psf model first')
@@ -99,13 +90,12 @@ class PSF():
         output_model = self.ouput_dir + self.target_filename + '_psf_model.fits'
 
         if len(hdul) == 1:
-            shutil.copyfile(filename, output_model)
+            if filename != output_model:
+                shutil.copyfile(filename, output_model)
         else:
-            shutil.copyfile(filename, output_fits)
+            if filename != output_fits:
+                shutil.copyfile(filename, output_fits)
             self.config_output_file = output_fits
             data = hdul[2].data
             fits.writeto(output_model, data, overwrite=True)
         self.model_file = output_model
-
-    def set_model(self):
-        pass
