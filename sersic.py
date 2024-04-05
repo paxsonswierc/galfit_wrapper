@@ -173,7 +173,7 @@ class Sersic():
                             angle -= 90
                         else:
                             angle += 90
-                    elif '0)' in component_line:
+                    if '0)' in component_line or component_line == lines[-1]:
                         d.set(f'region command "ellipse {x} {y} {a} {b} {angle}"')
                         break
             if '0) psf' in line:
@@ -182,7 +182,7 @@ class Sersic():
                     if '1)' in component_line:
                         x = float(words[1])
                         y = float(words[2])
-                    elif '0)' in component_line:
+                    if '0)' in component_line or component_line == lines[-1]:
                         d.set(f'region command "point {x} {y}"')
                         break
 

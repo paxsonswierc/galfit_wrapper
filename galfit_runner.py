@@ -9,13 +9,16 @@ from utils import get_paths, my_filebrowser
 
 def take_action(action):
     actions = {'help': help,
+               'target visualize': visualize_target,
                'psf create': psf_write_config,
                'psf visualize': psf_visualize,
                'psf upload': psf_upload,
-               'target visualize': visualize_target,
                'sersic create config': sersic_create_config,
-               'sersic upload config': sersic_upload_config,
+               'sersic edit config': sersic_edit_config,
                'sersic optimize config': sersic_optimize,
+               'sersic visualize': sersic_visualize,
+               'sersic upload config': sersic_upload_config,
+               'sersic upload model': sersic_upload_model,
                'mult fits': mult_fits}
     if action not in actions:
         print('Unkown command. Type help for assistance')
@@ -59,12 +62,22 @@ def visualize_target():
 def sersic_create_config():
     sersic.create_config(d)
 
+def sersic_edit_config():
+    sersic.edit_config(d)
+
 def sersic_upload_config():
     config_file = my_filebrowser()
     sersic.upload_config(config_file)
 
+def sersic_upload_model():
+    model_file = my_filebrowser()
+    sersic.upload_model(model_file)
+
 def sersic_optimize():
     sersic.optimize_config(d)
+
+def sersic_visualize():
+    sersic.visualize(d)
 
 def mult_fits():
     data, header = fits.getdata(target_path, header=True)
@@ -74,9 +87,9 @@ def mult_fits():
     fits.writeto(target_path, data, header, overwrite=True)
 
 if __name__ == '__main__':
-    ds9_commands = ['target visualize', 'psf create', 'psf visualize',\
-                    'sersic create config', 'sersic optimize config',\
-                    'sersic visualize']
+    ds9_commands = ['target visualize', 'psf create', 'psf visualize',
+                    'sersic create config', 'sersic edit config',
+                    'sersic optimize config', 'sersic visualize']
 
     path_to_galfit, path_to_output, galfit_output = get_paths()
 
@@ -96,6 +109,8 @@ if __name__ == '__main__':
         psf_model_file = None
         psf_mask = None
         sersic_config_file = None
+        sersic_config_output_file = None
+        sersic_mask = None
         for file in files:
             if file == target_filename + '_psf_config.txt':
                 psf_config_file = path_to_output + file
@@ -112,12 +127,18 @@ if __name__ == '__main__':
             if file == target_filename + '_config.txt':
                 sersic_config_file = path_to_output + file
 
+            if file == target_filename + '_model.fits':
+                sersic_config_output_file = path_to_output + file
+
+            if file == target_filename + '_mask.fits':
+                sersic_mask = path_to_output + file
+
         psf = PSF('?', target_path, path_to_output, path_to_galfit,
                   target_filename, psf_config_file,
                   psf_config_output_file, psf_model_file, psf_mask)
         sersic = Sersic('?', target_path, path_to_output, path_to_galfit,
                   target_filename, sersic_config_file,
-                  None, None, psf)
+                  sersic_config_output_file, sersic_mask, psf)
     else:
         os.mkdir(path_to_output + '/')
         psf = PSF('?', target_path, path_to_output, path_to_galfit,
