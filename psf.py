@@ -5,7 +5,7 @@ import pyds9
 import pyregion
 import numpy as np
 import math
-from region_to_psf import input_to_galfit
+from region_to_config import input_to_galfit
 import subprocess
 import shutil
 

@@ -35,7 +35,6 @@ def help():
 
     sersic create config
     sersic edit config
-    sersic edit config text
     sersic optimize config
     sersic visualize
     sersic upload config
@@ -75,6 +74,10 @@ def mult_fits():
     fits.writeto(target_path, data, header, overwrite=True)
 
 if __name__ == '__main__':
+    ds9_commands = ['target visualize', 'psf create', 'psf visualize',\
+                    'sersic create config', 'sersic optimize config',\
+                    'sersic visualize']
+
     path_to_galfit, path_to_output, galfit_output = get_paths()
 
     target_path = my_filebrowser()
@@ -128,14 +131,20 @@ if __name__ == '__main__':
     print('Welcome to galfit wrapper. Type help for assistance')
 
     #test = my_filebrowser()
-    d = pyds9.DS9()
-    d.set("fits new "+target_path)
-    d.set("scale mode 99.5")
+
+    # d = pyds9.DS9()
+    # d.set("fits new "+target_path)
+    # d.set("scale mode 99.5")
+    ds9_open = False
 
     while software_open == True:
         action = input(' > ')
+        if action in ds9_commands:
+            ds9_open = True
+            d = pyds9.DS9()
         if action == ('quit'):
             software_open = False
-            d.set('exit')
+            if ds9_open:
+                d.set('exit')
         else:
             take_action(action)

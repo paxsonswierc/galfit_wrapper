@@ -5,7 +5,7 @@ import pyds9
 import pyregion
 import numpy as np
 import math
-from region_to_psf import input_to_galfit
+from region_to_config import input_to_galfit
 import subprocess
 import shutil
 
@@ -55,7 +55,15 @@ class Sersic():
                 self.optimize_config(d)
 
     def edit_config(self, d):
-        assert self.config_file is not None
+        if self.config_file is None:
+            print('Please create config file first')
+        else:
+            d.set("fits new "+self.target_file)
+            d.set("scale mode 99.5")
+            self.config_to_region(d)
+            d.set("region shape ellipse")
+            input('Make any wanted changes. Hit enter to optimize')
+            self.optimize_config(d)
 
     def edit_config_text(self):
         assert self.config_file is not None
@@ -64,45 +72,62 @@ class Sersic():
         if self.config_file is None:
             print('Please create or upload config file first')
         else:
-            subprocess.run(['/bin/bash', '-c', self.galfit_path+" "+self.config_file])
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
-            print("galfit run done, loading into DS9...")
-            d.set("mecube new "+output_fits)
-            d.set("scale mode minmax")
-            d.set("mode none")
-            d.set("zoom to fit")
-            d.set("cube play")
+            if os.path.exists(output_fits):
+                os.remove(output_fits)
+            subprocess.run(['/bin/bash', '-c', self.galfit_path+" "+self.config_file])
+            print('Fitting finished')
+            if os.path.exists(output_fits):
+                print("galfit run done, loading into DS9...")
+                d.set("mecube new " + output_fits)
+                d.set("scale mode minmax")
+                d.set("mode none")
+                d.set("zoom to fit")
+                d.set("cube play")
 
-            prompt = '''What would you like to do? Enter ->
-            1: Save this model and config
-            2: Edit the output config of this model (continue process)
-            3: Reset from last stage and edit last config'''
-            next_step = input(prompt)
-            if next_step == '1':
-                # os.remove(self.config_file)
-                # shutil.copyfile('galfit.01', self.config_file)
-                output_fits_final = self.ouput_dir + self.target_filename + 'model.fits'
-                os.remove('galfit.01')
-                os.rename(output_fits, output_fits_final)
-                self.config_output_file = output_fits_final
+                prompt = '''What would you like to do? Enter ->
+1: Save this model and config
+2: Edit the output config of this model (continue process)
+3: Reset from last stage and edit last config
+ > '''
+                next_step = input(prompt)
+                if next_step == '1':
+                    # os.remove(self.config_file)
+                    # shutil.copyfile('galfit.01', self.config_file)
+                    output_fits_final = self.ouput_dir + self.target_filename + '_model.fits'
+                    os.remove('galfit.01')
+                    os.rename(output_fits, output_fits_final)
+                    self.config_output_file = output_fits_final
 
-            if next_step == '2':
-                pass
-            #     os.remove(self.config_file)
-            #     shutil.copyfile('galfit.01', self.config_file)
+                if next_step == '2':
+                    os.remove(self.config_file)
+                    shutil.copyfile('galfit.01', self.config_file)
+                    #os.rename(self.ouput_dir + 'galfit.01', self.config_file)
+                    os.remove('galfit.01')
+                    self.edit_config(d)
 
-            # done = input('Are you satisfied? yes/enter to continue, no to restart > ')
-            # if done == 'no':
-            #     self.write_config(d)
-            
-            # self.config_file = output_config
-            # self.config_output_file = output_fits
+                if next_step == '3':
+                    os.remove('galfit.01')
+                    self.edit_config(d)
+                    #self.optimize_config(d)
 
-            # hdul = fits.open(output_fits)
-            # data = hdul[2].data
-            # fits.writeto(output_model, data, overwrite=True)
+                #     os.remove(self.config_file)
+                #     shutil.copyfile('galfit.01', self.config_file)
 
-            # self.model_file = output_model
+                # done = input('Are you satisfied? yes/enter to continue, no to restart > ')
+                # if done == 'no':
+                #     self.write_config(d)
+                
+                # self.config_file = output_config
+                # self.config_output_file = output_fits
+
+                # hdul = fits.open(output_fits)
+                # data = hdul[2].data
+                # fits.writeto(output_model, data, overwrite=True)
+
+                # self.model_file = output_model
+            else:
+                print('Galfit crashed. Please edit/remake config file and try again.')
 
     def visualize(self, d):
         if self.config_output_file is None:
@@ -121,3 +146,44 @@ class Sersic():
 
     def upload_model(self, file):
         self.config_output_file = self.ouput_dir + self.target_filename + '_config.txt'
+        if file != self.config_output_file:
+            shutil.copyfile(file, self.config_output_file)
+
+    def config_to_region(self, d):
+        assert self.config_file is not None
+
+        config = open(self.config_file, 'r')
+        lines = config.readlines()
+
+        for i, line in enumerate(lines):
+            if 'sersic' in line and 'sersic,' not in line:
+                for component_line in lines[i+1:]:
+                    words = component_line.split()
+                    if '1)' in component_line:
+                        x = float(words[1])
+                        y = float(words[2])
+                    elif '4) ' in component_line and '=4)' not in component_line:
+                        a = float(words[1])
+                    elif '9)' in component_line:
+                        b_over_a = float(words[1])
+                        b = b_over_a * a
+                    elif '10)' in component_line:
+                        angle = float(words[1])
+                        if angle >= 270:
+                            angle -= 90
+                        else:
+                            angle += 90
+                    elif '0)' in component_line:
+                        d.set(f'region command "ellipse {x} {y} {a} {b} {angle}"')
+                        break
+            if '0) psf' in line:
+                for component_line in lines[i+1:]:
+                    words = component_line.split()
+                    if '1)' in component_line:
+                        x = float(words[1])
+                        y = float(words[2])
+                    elif '0)' in component_line:
+                        d.set(f'region command "point {x} {y}"')
+                        break
+
+        config.close()

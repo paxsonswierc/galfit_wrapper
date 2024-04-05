@@ -181,7 +181,10 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
             elif region.name == 'ellipse':
                 x, y, a, b, angle = region.coord_list
                 if b > a:
-                    angle = angle - 90
+                    if angle >= 270:
+                        angle -= 90
+                    else:
+                        angle += 90
                     a,b = b,a
                 small_regions_mask_mag = pyregion.get_mask([region], fits_data).astype(int)
                 sum_pixels = (np.sum(fits_data * small_regions_mask_mag)) * 2
