@@ -57,18 +57,18 @@ class PSF():
             d.set("zoom to fit")
             d.set("cube play")
 
-            done = input('Are you satisfied? yes/enter to continue, no to restart > ')
+            done = input('Are you satisfied? yes/enter to continue, no to restart, or quit > ')
             if done == 'no':
                 self.write_config(d)
-            
-            self.config_file = output_config
-            self.config_output_file = output_fits
+            if done != 'quit':
+                self.config_file = output_config
+                self.config_output_file = output_fits
 
-            hdul = fits.open(output_fits)
-            data = hdul[2].data
-            fits.writeto(output_model, data, overwrite=True)
+                hdul = fits.open(output_fits)
+                data = hdul[2].data
+                fits.writeto(output_model, data, overwrite=True)
 
-            self.model_file = output_model
+                self.model_file = output_model
 
         else:
             print('Galfit crashed! Please try again')
