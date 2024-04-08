@@ -1,2 +1,2 @@
 ~/fieldcourse/galfit/galfit
-~/fieldcourse/galfit_test0001
+/home/babnigg/fieldcourse/galfit_test0001

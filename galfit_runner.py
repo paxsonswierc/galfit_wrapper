@@ -191,11 +191,11 @@ if __name__ == '__main__':
                   sersic_config_output_file, sersic_mask, psf)
     else:
         # Create output directory and initialize psf/sersic objects empty
-        os.mkdir(path_to_output)
+        os.makedirs(path_to_output)
         psf = PSF('?', target_path, path_to_output, path_to_galfit,
                   target_filename)
         sersic = Sersic('?', target_path, path_to_output, path_to_galfit,
-                  target_filename)
+                  target_filename, psf=psf)
 
     # Initialize event loop
     print('Welcome to galfit wrapper. Type help for assistance')
