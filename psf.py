@@ -20,6 +20,7 @@ class PSF():
         mask: path to mask fits file for galfit
 
     Methods:
+        write_config: creates galfit config file with ds9 
     '''
     def __init__(self, filter, target_file, ouput_dir, galfit_path,
                  target_filename, config_file=None,

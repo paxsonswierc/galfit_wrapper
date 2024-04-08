@@ -24,7 +24,7 @@ def get_paths():
         if path_to_galfit[-1*i - 1] == '/':
             galfit_output = path_to_galfit[:-i]
             break
-    
+    # TODO add os way to do this
     if path_to_output[-1] != '/':
         path_to_output += '/'
 
