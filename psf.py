@@ -1,16 +1,26 @@
-# Base class for PSF
+# Class for PSF models
+
 from astropy.io import fits
 import os
-import pyds9
-import pyregion
-import numpy as np
-import math
 from region_to_config import input_to_galfit
 import subprocess
 import shutil
 
 class PSF():
+    '''
+    Class to track galfit psf model for a given fits file.
 
+    Attributes:
+        filter: fits image band
+        target_file: path to the target fits file
+        output_dir: directory where model outputs are saved
+        config_file: path to galfit configuration file for a point source
+        config_output_file: path to fits file outputted by galfit (4 frames)
+        model_file: path to fits file with model frame from galfit output
+        mask: path to mask fits file for galfit
+
+    Methods:
+    '''
     def __init__(self, filter, target_file, ouput_dir, galfit_path,
                  target_filename, config_file=None,
                  config_output_file=None, model_file=None, mask=None):
