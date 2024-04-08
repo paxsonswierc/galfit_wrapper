@@ -150,7 +150,7 @@ if __name__ == '__main__':
     target_filename = target_path.split('/')[-1][:-5]
     path_to_output += target_filename + '/'
     # Check if output directory for this file already exists
-    if os.path.exists(path_to_output + '/'):
+    if os.path.exists(path_to_output):
         # Initialize possible data as None
         psf_config_file = None
         psf_config_output_file = None
@@ -160,7 +160,7 @@ if __name__ == '__main__':
         sersic_config_output_file = None
         sersic_mask = None
         # Check for any saved data in output dir and add path for it
-        files = os.listdir(path_to_output + '/')
+        files = os.listdir(path_to_output)
         for file in files:
             if file == target_filename + '_psf_config.txt':
                 psf_config_file = path_to_output + file
@@ -191,7 +191,7 @@ if __name__ == '__main__':
                   sersic_config_output_file, sersic_mask, psf)
     else:
         # Create output directory and initialize psf/sersic objects empty
-        os.mkdir(path_to_output + '/')
+        os.mkdir(path_to_output)
         psf = PSF('?', target_path, path_to_output, path_to_galfit,
                   target_filename)
         sersic = Sersic('?', target_path, path_to_output, path_to_galfit,

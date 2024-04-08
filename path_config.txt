@@ -1,2 +1,2 @@
-/Users/pswierc/galfit/galfit
-/Users/pswierc/galfit_outputs
+~/fieldcourse/galfit/galfit
+~/fieldcourse/galfit_test0001
