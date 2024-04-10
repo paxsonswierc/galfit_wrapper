@@ -23,3 +23,11 @@ and to an output directory. The output directory is where all output models/conf
 If you ever want to change these or you input them wrong, you can edit the two paths in path_config.txt
 Alternatively, you can just delete all text from path_config.txt and galfit wrapper will as your input
 again next time you run it.
+
+## NOTE ON OUTPUT DIRECTORY AND TARGET FILE LOCATION
+
+Galfit has a bug where input filenames that are too long will stop it from running correctly. To avoid this,
+please place your output directory and the target fits files you will be working with as close to your home directory
+as possible. We are working on a fix for this, but please use the previous temporary solution for now.
+
+## Feel free to log any crashes or bugs in issues! Reach out to pswierc@uchicago.edu or Paxson on slack for help
