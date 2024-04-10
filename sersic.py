@@ -1,3 +1,4 @@
+# Class for sersic models
 
 from astropy.io import fits
 import os
@@ -36,7 +37,7 @@ class Sersic():
     def __init__(self, filter: str, target_file: str, ouput_dir: str,
                  galfit_path: str, target_filename: str,
                  config_file: str|None =None, config_output_file: str|None =None,
-                 mask: str|None =None, psf: 'PSF'|None =None):
+                 mask: str|None =None, psf=None):
         self.filter = filter
         self.target_file = target_file
         self.ouput_dir = ouput_dir
@@ -47,7 +48,7 @@ class Sersic():
         self.mask = mask
         self.psf = psf
 
-    def create_config(self, d):
+    def create_config(self, d) -> None:
         '''
         Creates galfit config and optimizes it, from user inputted ds9 regions.
         Opens ds9 window of target to prompt for region input
@@ -64,53 +65,73 @@ class Sersic():
             d.set("fits new "+self.target_file)
             d.set("scale mode 99.5")
             d.set("mode region")
+            # Prompt user to place ellipse region for galaxies
             d.set("region shape ellipse")
             input('Place ellipses for galaxies. Hit enter when region is placed\n')
+            # Prompt user to place point region for psf component
             d.set("region shape point")
             input('Place point for point sources. Hit enter when region is placed\n')
             d.set("region shape box")
             input('Place box for frame. Hit enter when region is placed\n')
             regions = d.get("region")
-
+            # Establish filenames
             self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
             output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
-
+            # Set galfit config file
             input_to_galfit(self.target_file, False, regions, 32.5,
                             self.config_file, output_fits, output_mask,
                             self.psf.model_file, False, False)
-
+            # Get rid of regions
             d.set('region select all')
             d.set('region delete select')
-
+            # Optimize with galfit config
             optimize = input('Run galfit for this config? Hit enter for yes, type no otherwise')
             if optimize != 'no':
                 self.optimize_config(d)
 
-    def edit_config(self, d):
+    def edit_config(self, d) -> None:
+        '''
+        Reopens config file as regions as ds9 to be edited
+
+        Args:
+            d: pyds9 DS9 instnce
+
+        Returns: Nothing
+        '''
         if self.config_file is None:
             print('Please create config file first')
         else:
+            # Open target in ds9
             d.set("fits new "+self.target_file)
             d.set("scale mode 99.5")
             d.set("mode region")
+            # Load in regions
             box, mags = self.config_to_region(d)
             d.set("region shape ellipse")
             input('Make any wanted changes. Hit enter to optimize')
 
             regions = d.get("region")
-
+            # Establish output files
             self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
             output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
-
+            # Write to galfit config file
             input_to_galfit(self.target_file, False, regions, 32.5,
                             self.config_file, output_fits, output_mask,
                             self.psf.model_file, box, mags)
-
+            # Optimize with new config file
             self.optimize_config(d)
 
-    def optimize_config(self, d):
+    def optimize_config(self, d) -> None:
+        '''
+        Optimizes a galfit model based on config file
+
+        Args:
+            d: pyds9 DS9 instance
+        
+        Returns: Nothing
+        '''
         if self.config_file is None:
             print('Please create or upload config file first')
         else:
@@ -141,33 +162,17 @@ class Sersic():
                     os.rename(output_fits, output_fits_final)
                     self.config_output_file = output_fits_final
 
-                if next_step == '2':
+                elif next_step == '2':
                     os.remove(self.config_file)
                     shutil.copyfile('galfit.01', self.config_file)
                     #os.rename(self.ouput_dir + 'galfit.01', self.config_file)
                     os.remove('galfit.01')
                     self.edit_config(d)
 
-                if next_step == '3':
+                elif next_step == '3':
                     os.remove('galfit.01')
                     self.edit_config(d)
-                    #self.optimize_config(d)
 
-                #     os.remove(self.config_file)
-                #     shutil.copyfile('galfit.01', self.config_file)
-
-                # done = input('Are you satisfied? yes/enter to continue, no to restart > ')
-                # if done == 'no':
-                #     self.write_config(d)
-                
-                # self.config_file = output_config
-                # self.config_output_file = output_fits
-
-                # hdul = fits.open(output_fits)
-                # data = hdul[2].data
-                # fits.writeto(output_model, data, overwrite=True)
-
-                # self.model_file = output_model
             else:
                 print('Galfit crashed. Please edit/remake config file and try again.')
 

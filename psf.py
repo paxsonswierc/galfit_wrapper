@@ -40,7 +40,7 @@ class PSF():
         self.model_file = model_file
         self.mask = mask
 
-    def write_config(self, d: 'DS9') -> None:
+    def write_config(self, d) -> None:
         '''
         Creates galfit config and optimizes it, from user inputted ds9 regions.
         Opens ds9 window of target to prompt for region input
@@ -66,7 +66,7 @@ class PSF():
         output_fits = self.ouput_dir + self.target_filename + '_psf.fits'
         output_model = self.ouput_dir + self.target_filename + '_psf_model.fits'
         output_mask = self.ouput_dir + self.target_filename + '_psf_mask.fits'
-        # Run galfit optimization, which will set output_config file
+        # Set galfit config file
         input_to_galfit(self.target_file, True, psf_regions, 32.5,
                         output_config, output_fits, output_mask, 'none',
                         False, False)
@@ -108,7 +108,7 @@ class PSF():
         else:
             print('Galfit crashed! Please try again')
 
-    def visualize(self, d: 'DS9') -> None:
+    def visualize(self, d) -> None:
         '''
         Visualizes psf model using ds9. Will prioritize showing full 4 frames
         from galfit output, but will display only single model frame if only
