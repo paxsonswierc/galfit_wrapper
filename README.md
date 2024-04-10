@@ -15,11 +15,12 @@ Python libraries:
 
 ## Running galfit wrapper
 
-To run download repository and run 
+Download code into directory of your choice. cd into the directory and run the following. Note that currently,
+you must run from inside the directory with the code or it may break.
 ```
 $ python3 galfit_wrapper.py
 ```
-  This will open up prompt to input a target fits file to start working on
+This will open up prompt to input a target fits file to start working on
 
 Alternatively, you can give the target fits file path as a command line argument
 ```
