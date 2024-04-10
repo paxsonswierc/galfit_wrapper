@@ -1,4 +1,4 @@
-Welcome to galfit_wrapper!
+# Welcome to galfit_wrapper!
 
 Current dependencies:
   bash
