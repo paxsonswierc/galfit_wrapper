@@ -2,6 +2,8 @@
 
 ## Current dependencies:
 
+### System/Executables:
+
 bash, ds9 able to run through terminal, galfit
 
 ### Python libraries:
