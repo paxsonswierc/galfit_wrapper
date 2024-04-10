@@ -1,15 +1,8 @@
 # Welcome to galfit_wrapper!
 
-Current dependencies:
-  bash
-  ds9 able to run through terminal
-  galfit
+Current dependencies: bash, ds9 able to run through terminal, galfit
 
-  Python libraries:
-    numpy
-    astropy
-    pyds9
-    pyregion
+  Python libraries: numpy, astropy, pyds9, pyregion
 
 To run download repository and run 
 $ python3 galfit_runner.py
