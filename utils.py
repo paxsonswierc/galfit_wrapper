@@ -1,3 +1,6 @@
+# Util functions for galfit wrapper
+# Author: Paxson Swierc
+
 from tkinter.filedialog import askopenfilename, askdirectory 
 from tkinter import Tk
 import os

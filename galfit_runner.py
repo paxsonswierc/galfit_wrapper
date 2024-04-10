@@ -1,4 +1,5 @@
-# Event runner for galfit wrapper TUI.
+# Event runner for galfit wrapper TUI
+# Author: Paxson Swierc
 
 import os
 import sys

@@ -1,4 +1,5 @@
 # Class for PSF models
+# Author: Paxson Swierc & Daniel Babnigg
 
 from astropy.io import fits
 import os

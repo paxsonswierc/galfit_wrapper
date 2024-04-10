@@ -1,6 +1,6 @@
-import pyds9
-import os
-import subprocess
+# Function to convert a ds9 region to a config file
+# Author: Daniel Babnigg
+
 import pyregion
 from astropy.io import fits
 import numpy as np

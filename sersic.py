@@ -1,4 +1,5 @@
 # Class for sersic models
+# Author: Paxson Swierc & Daniel Babnigg
 
 from astropy.io import fits
 import os
@@ -135,19 +136,27 @@ class Sersic():
         if self.config_file is None:
             print('Please create or upload config file first')
         else:
+            # Get rid of any previous galfit output config files
+            if os.path.exists('galfit.01'):
+                os.remove('galfit.01')
+            # Final output file
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
+            # Remove any previous temporary model outputs
             if os.path.exists(output_fits):
                 os.remove(output_fits)
+            # Run galfit
             subprocess.run(['/bin/bash', '-c', self.galfit_path+" "+self.config_file])
             print('Fitting finished')
+            # Check if galfit was successful
             if os.path.exists(output_fits):
                 print("galfit run done, loading into DS9...")
+                # Open output in ds9
                 d.set("mecube new " + output_fits)
                 d.set("scale mode minmax")
                 d.set("mode none")
                 d.set("zoom to fit")
                 d.set("cube play")
-
+                # Prompt next decision to user. Any other input exits loop
                 prompt = '''What would you like to do? Enter ->
 1: Save this model and config
 2: Edit the output config of this model (continue process)
@@ -155,28 +164,37 @@ class Sersic():
  > '''
                 next_step = input(prompt)
                 if next_step == '1':
-                    # os.remove(self.config_file)
-                    # shutil.copyfile('galfit.01', self.config_file)
+                    # Save the model and config
                     output_fits_final = self.ouput_dir + self.target_filename + '_model.fits'
                     os.remove('galfit.01')
                     os.rename(output_fits, output_fits_final)
                     self.config_output_file = output_fits_final
 
                 elif next_step == '2':
+                    # Replace this config with galfit output config
                     os.remove(self.config_file)
                     shutil.copyfile('galfit.01', self.config_file)
-                    #os.rename(self.ouput_dir + 'galfit.01', self.config_file)
                     os.remove('galfit.01')
+                    # Continue editing loop
                     self.edit_config(d)
 
                 elif next_step == '3':
+                    # Remove galfit output config and go back to editing
                     os.remove('galfit.01')
                     self.edit_config(d)
 
             else:
                 print('Galfit crashed. Please edit/remake config file and try again.')
 
-    def visualize(self, d):
+    def visualize(self, d) -> None:
+        '''
+        Visualizes sersic model using ds9
+
+        Args: 
+            d: pyds9 DS9 instance
+
+        Returns: Nothing
+        '''
         if self.config_output_file is None:
             print('Please upload or create psf model first')
         else:
@@ -186,80 +204,116 @@ class Sersic():
             d.set("zoom to fit")
             d.set("cube play")
 
-    def upload_config(self, file, d):
+    def upload_config(self, file: str, d) -> None:
+        '''
+        Prompts user to upload config file and copies it to output dir
+
+        Args:
+            file: path to upload file
+
+        Returns: Nothing
+        '''
         if self.psf.model_file is None:
             print('Please create or upload psf first')
         else:
+            # Update config filename
             self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
             if file != self.config_file:
                 shutil.copyfile(file, self.config_file)
+            # Convert config to regions to get info on box size
             box, mags = self.config_to_region(d)
 
             regions = d.get("region")
-
+            # Establish filenames
             self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
             output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
-
+            # Write new galfit config (to update filenames in the uploaded)
             input_to_galfit(self.target_file, False, regions, 32.5,
                             self.config_file, output_fits, output_mask,
                             self.psf.model_file, box, mags)
 
-    def upload_model(self, file):
+    def upload_model(self, file: str) -> None:
+        '''
+        Prompts user to upload already completed model file. This would be for
+        visualization purposes generally. Makes a copy of the file in
+        output directory
+
+        Args:
+            file: path to upload file
+
+        Returns: Nothing
+        '''
         self.config_output_file = self.ouput_dir + self.target_filename + '_config.txt'
         if file != self.config_output_file:
             shutil.copyfile(file, self.config_output_file)
 
-    def config_to_region(self, d):
+    def config_to_region(self, d) -> tuple[list[int], list[float]]:
+        '''
+        Converts a galfit config file into ds9 regions
+        '''
+        # TODO: add magnitude memory for psf components
         assert self.config_file is not None
-
+        # Open target file into ds9
         d.set("fits new "+self.target_file)
         d.set("scale mode 99.5")
+        # Keep track of magnitudes of all components
         magnitudes = []
         config = open(self.config_file, 'r')
         lines = config.readlines()
 
         for i, line in enumerate(lines):
+            # Check for sersic component
             if 'sersic' in line and 'sersic,' not in line:
                 for component_line in lines[i+1:]:
                     words = component_line.split()
                     if '1)' in component_line:
+                        # Get position info
                         x = float(words[1])
                         y = float(words[2])
                     elif '3)' in component_line:
+                        # Get magnitude info
                         magnitudes.append(float(words[1]))
-
                     elif '4) ' in component_line and '=4)' not in component_line:
+                        # Get effective radius
                         a = float(words[1])
                     elif '9)' in component_line:
+                        # Get axis ratio
                         b_over_a = float(words[1])
                         b = b_over_a * a
                     elif '10)' in component_line:
+                        # Get angle
                         angle = float(words[1])
                         if angle >= 270:
                             angle -= 90
                         else:
                             angle += 90
                     if '0)' in component_line or component_line == lines[-1]:
+                        # Set ellipse region
                         d.set(f'region command "ellipse {x} {y} {a} {b} {angle}"')
                         break
+            # Check for psf component
             if '0) psf' in line:
                 for component_line in lines[i+1:]:
                     words = component_line.split()
                     if '1)' in component_line:
+                        # Get position info
                         x = float(words[1])
                         y = float(words[2])
                     if '0)' in component_line or component_line == lines[-1]:
+                        # Set region
                         d.set(f'region command "point {x} {y}"')
                         break
             if 'H)' in line:
                 words = line.split()
+                # Save box information
                 x_min = int(words[1])
                 x_max = int(words[2])
                 y_min = int(words[3])
                 y_max = int(words[4])
             if 'I)' in line:
                 words = line.split()
+                # Save box information
                 x_center = int(words[1])
                 y_center = int(words[2])
 
