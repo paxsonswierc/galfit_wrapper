@@ -1,0 +1,2 @@
+/Users/pswierc/galfit/galfit
+/Users/pswierc/galfit_outputs

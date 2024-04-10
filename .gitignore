@@ -2,3 +2,4 @@ __pycache__/
 fit.log
 .DS_Store
 galfit.*
+path_config.txt
