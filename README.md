@@ -2,13 +2,9 @@
 
 ## Current dependencies:
 
-### System/Executables:
+System/Executables: bash, ds9 able to run through terminal, galfit
 
-bash, ds9 able to run through terminal, galfit
-
-### Python libraries:
-
-numpy, astropy, pyds9, pyregion
+Python libraries: numpy, astropy, pyds9, pyregion
 
 ## Running galfit wrapper
 
