@@ -2,9 +2,16 @@
 
 ## Current dependencies:
 
-System/Executables: bash, ds9 able to run through terminal, galfit
+System/Executables: 
+ * bash
+ * ds9 able to run through terminal
+ * galfit
 
-Python libraries: numpy, astropy, pyds9, pyregion
+Python libraries: 
+ * numpy
+ * astropy
+ * pyds9
+ * pyregion
 
 ## Running galfit wrapper
 
@@ -24,10 +31,17 @@ If you ever want to change these or you input them wrong, you can edit the two p
 Alternatively, you can just delete all text from path_config.txt and galfit wrapper will as your input
 again next time you run it.
 
+For a list of commands, type help into tui
+
 ## NOTE ON OUTPUT DIRECTORY AND TARGET FILE LOCATION
 
 Galfit has a bug where input filenames that are too long will stop it from running correctly. To avoid this,
 please place your output directory and the target fits files you will be working with as close to your home directory
 as possible. We are working on a fix for this, but please use the previous temporary solution for now.
+
+## Missing features to be added
+
+* Automatic constraint file generation
+* In terminal text editing option for config files
 
 ## Feel free to log any crashes or bugs in issues! Reach out to pswierc@uchicago.edu or Paxson on slack for help
