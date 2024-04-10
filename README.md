@@ -39,9 +39,10 @@ Galfit has a bug where input filenames that are too long will stop it from runni
 please place your output directory and the target fits files you will be working with as close to your home directory
 as possible. We are working on a fix for this, but please use the previous temporary solution for now.
 
-## Missing features to be added
+## Missing features in developement
 
 * Automatic constraint file generation
 * In terminal text editing option for config files
+* Better multi band support (rgb images, automatic propogation between bands, etc.)
 
 ## Feel free to log any crashes or bugs in issues! Reach out to pswierc@uchicago.edu or Paxson on slack for help
