@@ -10,11 +10,33 @@ import subprocess
 import shutil
 
 class Sersic():
+    '''
+    Class to track galfit sersic model for a given fits file.
 
-    def __init__(self, filter, target_file, ouput_dir, galfit_path,
-                 target_filename, config_file=None,
-                 config_output_file=None, mask=None,
-                 psf=None):
+    Attributes:
+        filter: fits image band
+        target_file: path to the target fits file
+        output_dir: directory where model outputs are saved
+        galfit_path: path to galfit
+        target_filename: filename of target
+        config_file: path to galfit configuration file for a point source
+        config_output_file: path to fits file outputted by galfit (4 frames)
+        mask: path to mask fits file for galfit
+        psf: instance of psf class
+
+    Methods:
+        create_config: creates galfit config file with ds9 
+        edit_config: allows editing of current config with ds9
+        optimize_config: runs galfit for current config file
+        visualize: opens up psf model in ds9
+        upload_config: copies uploaded config to dir and loads it to instance
+        upload_model: copies uploaded model to dir and loads it to instance
+        config_to_region: converts current config file back into ds9 regions
+    '''
+    def __init__(self, filter: str, target_file: str, ouput_dir: str,
+                 galfit_path: str, target_filename: str,
+                 config_file: str|None =None, config_output_file: str|None =None,
+                 mask: str|None =None, psf: 'PSF'|None =None):
         self.filter = filter
         self.target_file = target_file
         self.ouput_dir = ouput_dir
@@ -26,9 +48,19 @@ class Sersic():
         self.psf = psf
 
     def create_config(self, d):
+        '''
+        Creates galfit config and optimizes it, from user inputted ds9 regions.
+        Opens ds9 window of target to prompt for region input
+
+        Args:
+            d: pyds9 DS9 instance
+
+        Returns: Nothing
+        '''
         if self.psf.model_file is None:
             print('Please create or upload psf first')
         else:
+            # Open target in ds9
             d.set("fits new "+self.target_file)
             d.set("scale mode 99.5")
             d.set("mode region")
@@ -77,9 +109,6 @@ class Sersic():
                             self.psf.model_file, box, mags)
 
             self.optimize_config(d)
-
-    def edit_config_text(self):
-        assert self.config_file is not None
 
     def optimize_config(self, d):
         if self.config_file is None:

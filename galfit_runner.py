@@ -1,6 +1,7 @@
 # Event runner for galfit wrapper TUI.
 
 import os
+import sys
 import pyds9
 from astropy.io import fits
 from psf import PSF
@@ -141,14 +142,23 @@ if __name__ == '__main__':
                     'sersic upload config']
     # Reads in paths from local config file. If none, prompts user for them
     path_to_galfit, path_to_output, galfit_output = get_paths()
-    # Prompts user for target fits file to be worked on
-    target_path = my_filebrowser()
+
+    if len(sys.argv) > 1:
+        if os.path.exists(sys.argv[1]):
+            # Checks for input path to target
+            target_path = sys.argv[1]
+        else:
+            print('Please input a valid target path!')
+            quit()
+    else:
+        # Prompts user for target fits file to be worked on
+        target_path = my_filebrowser()
     if target_path[-5:] != '.fits':
         print('###\nError: please upload .fits type target file\n###')
         quit()
-    # Get filename and path to directory for target
-    target_filename = target_path.split('/')[-1][:-5]
-    path_to_output += target_filename + '/'
+    # Make path to directory for target
+    target_filename = os.path.basename(target_path)[:-5]
+    path_to_output = os.path.join(path_to_output, target_filename, '')
     # Check if output directory for this file already exists
     if os.path.exists(path_to_output):
         # Initialize possible data as None
@@ -190,7 +200,7 @@ if __name__ == '__main__':
                   target_filename, sersic_config_file,
                   sersic_config_output_file, sersic_mask, psf)
     else:
-        # Create output directory and initialize psf/sersic objects empty
+        # Create output directory (only used if someone manually made config)
         os.makedirs(path_to_output)
         psf = PSF('?', target_path, path_to_output, path_to_galfit,
                   target_filename)
