@@ -20,6 +20,7 @@ def take_action(action: str) -> None:
     '''
     actions = {'help': help,
                'target visualize': visualize_target,
+               'change zero point': edit_zero_point,
                'psf create': psf_write_config,
                'psf visualize': psf_visualize,
                'psf upload': psf_upload,
@@ -45,6 +46,8 @@ def help():
 
     target visualize
 
+    change zero point
+
     psf create
     psf visualize
     psf upload
@@ -66,6 +69,19 @@ def visualize_target():
     '''
     d.set("fits new " + target_path)
     d.set("scale mode 99.5")
+
+def edit_zero_point():
+    '''
+    Changes zero point saved in file
+    '''
+    zero_point = input('What is the zero point of the image? Input number and hit enter > ')
+    # Write to zero point file for future reference
+    zero_point_file = open(path_to_output + 'zero_point.txt', 'w')
+    zero_point_file.write(zero_point)
+    zero_point_file.close()
+    zero_point = float(zero_point)
+    psf.zero_point = zero_point
+    sersic.zero_point = zero_point
 
 def psf_write_config():
     '''
@@ -161,52 +177,61 @@ if __name__ == '__main__':
     target_filename = os.path.basename(target_path)[:-5]
     path_to_output = os.path.join(path_to_output, target_filename, '')
     # Check if output directory for this file already exists
-    if os.path.exists(path_to_output):
-        # Initialize possible data as None
-        psf_config_file = None
-        psf_config_output_file = None
-        psf_model_file = None
-        psf_mask = None
-        sersic_config_file = None
-        sersic_config_output_file = None
-        sersic_mask = None
-        # Check for any saved data in output dir and add path for it
-        files = os.listdir(path_to_output)
-        for file in files:
-            if file == target_filename + '_psf_config.txt':
-                psf_config_file = path_to_output + file
-
-            if file == target_filename + '_psf.fits':
-                psf_config_output_file = path_to_output + file
-    
-            if file == target_filename + '_psf_model.fits':
-                psf_model_file = path_to_output + file
-
-            if file == target_filename + '_psf_mask.fits':
-                psf_mask = path_to_output + file
-
-            if file == target_filename + '_config.txt':
-                sersic_config_file = path_to_output + file
-
-            if file == target_filename + '_model.fits':
-                sersic_config_output_file = path_to_output + file
-
-            if file == target_filename + '_mask.fits':
-                sersic_mask = path_to_output + file
-        # Initialize psf and sersic objects
-        psf = PSF('?', target_path, path_to_output, path_to_galfit,
-                  target_filename, psf_config_file,
-                  psf_config_output_file, psf_model_file, psf_mask)
-        sersic = Sersic('?', target_path, path_to_output, path_to_galfit,
-                  target_filename, sersic_config_file,
-                  sersic_config_output_file, sersic_mask, psf)
-    else:
-        # Create output directory (only used if someone manually made config)
+    if not os.path.exists(path_to_output):
+        # Should only happen when user manually changes path_config.txt
         os.makedirs(path_to_output)
-        psf = PSF('?', target_path, path_to_output, path_to_galfit,
-                  target_filename)
-        sersic = Sersic('?', target_path, path_to_output, path_to_galfit,
-                  target_filename, psf=psf)
+    # Initialize possible data as None
+    psf_config_file = None
+    psf_config_output_file = None
+    psf_model_file = None
+    psf_mask = None
+    sersic_config_file = None
+    sersic_config_output_file = None
+    sersic_mask = None
+    # Check for zero point file
+    if not os.path.exists(path_to_output + 'zero_point.txt'):
+        zero_point = input('What is the zero point of the image? Input number and hit enter > ')
+        # Write to zero point file for future reference
+        zero_point_file = open(path_to_output + 'zero_point.txt', 'w')
+        zero_point_file.write(zero_point)
+        zero_point_file.close()
+        zero_point = float(zero_point)
+    else:
+        # Load in zero point info
+        zero_point_file = open(path_to_output + 'zero_point.txt')
+        zero_point = zero_point_file.readlines()
+        zero_point = float(zero_point[0])
+    # Check for any saved data in output dir and add path for it
+    files = os.listdir(path_to_output)
+    for file in files:
+        if file == target_filename + '_psf_config.txt':
+            psf_config_file = path_to_output + file
+
+        if file == target_filename + '_psf.fits':
+            psf_config_output_file = path_to_output + file
+
+        if file == target_filename + '_psf_model.fits':
+            psf_model_file = path_to_output + file
+
+        if file == target_filename + '_psf_mask.fits':
+            psf_mask = path_to_output + file
+
+        if file == target_filename + '_config.txt':
+            sersic_config_file = path_to_output + file
+
+        if file == target_filename + '_model.fits':
+            sersic_config_output_file = path_to_output + file
+
+        if file == target_filename + '_mask.fits':
+            sersic_mask = path_to_output + file
+        
+    # Initialize psf and sersic objects
+    psf = PSF('?', target_path, path_to_output, path_to_galfit,
+                target_filename, zero_point, psf_config_file,
+                psf_config_output_file, psf_model_file, psf_mask)
+    sersic = Sersic('?', target_path, path_to_output, path_to_galfit,
+                target_filename, zero_point, sersic_config_file,
+                sersic_config_output_file, sersic_mask, psf)
 
     # Initialize event loop
     print('Welcome to galfit wrapper. Type help for assistance')

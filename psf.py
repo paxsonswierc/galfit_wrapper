@@ -17,6 +17,7 @@ class PSF():
         output_dir: directory where model outputs are saved
         galfit_path: path to galfit
         target_filename: filename of target
+        zero_point: zero point of target image
         config_file: path to galfit configuration file for a point source
         config_output_file: path to fits file outputted by galfit (4 frames)
         model_file: path to fits file with model frame from galfit output
@@ -28,7 +29,7 @@ class PSF():
         upload_psf: copies uploaded psf model to dir and loads it to instance
     '''
     def __init__(self, filter: str, target_file: str, ouput_dir: str,
-                 galfit_path: str, target_filename: str,
+                 galfit_path: str, target_filename: str, zero_point: float,
                  config_file: str|None =None, config_output_file: str|None =None,
                  model_file: str|None =None, mask: str|None =None):
         self.filter = filter
@@ -36,6 +37,7 @@ class PSF():
         self.ouput_dir = ouput_dir
         self.galfit_path = galfit_path
         self.target_filename = target_filename
+        self.zero_point = zero_point
         self.config_file = config_file
         self.config_output_file = config_output_file
         self.model_file = model_file
@@ -68,7 +70,7 @@ class PSF():
         output_model = self.ouput_dir + self.target_filename + '_psf_model.fits'
         output_mask = self.ouput_dir + self.target_filename + '_psf_mask.fits'
         # Set galfit config file
-        input_to_galfit(self.target_file, True, psf_regions, 32.5,
+        input_to_galfit(self.target_file, True, psf_regions, self.zero_point,
                         output_config, output_fits, output_mask, 'none',
                         False, False)
         # Delete old regions

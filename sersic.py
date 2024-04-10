@@ -21,6 +21,7 @@ class Sersic():
         output_dir: directory where model outputs are saved
         galfit_path: path to galfit
         target_filename: filename of target
+        zero_point: zero point of target image
         config_file: path to galfit configuration file for a point source
         config_output_file: path to fits file outputted by galfit (4 frames)
         mask: path to mask fits file for galfit
@@ -36,7 +37,7 @@ class Sersic():
         config_to_region: converts current config file back into ds9 regions
     '''
     def __init__(self, filter: str, target_file: str, ouput_dir: str,
-                 galfit_path: str, target_filename: str,
+                 galfit_path: str, target_filename: str, zero_point: float,
                  config_file: str|None =None, config_output_file: str|None =None,
                  mask: str|None =None, psf=None):
         self.filter = filter
@@ -44,6 +45,7 @@ class Sersic():
         self.ouput_dir = ouput_dir
         self.galfit_path = galfit_path
         self.target_filename = target_filename
+        self.zero_point = zero_point
         self.config_file = config_file
         self.config_output_file = config_output_file
         self.mask = mask
@@ -80,7 +82,7 @@ class Sersic():
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
             output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
             # Set galfit config file
-            input_to_galfit(self.target_file, False, regions, 32.5,
+            input_to_galfit(self.target_file, False, regions, self.zero_point,
                             self.config_file, output_fits, output_mask,
                             self.psf.model_file, False, False)
             # Get rid of regions
@@ -118,7 +120,7 @@ class Sersic():
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
             output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
             # Write to galfit config file
-            input_to_galfit(self.target_file, False, regions, 32.5,
+            input_to_galfit(self.target_file, False, regions, self.zero_point,
                             self.config_file, output_fits, output_mask,
                             self.psf.model_file, box, mags)
             # Optimize with new config file
@@ -229,7 +231,7 @@ class Sersic():
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
             output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
             # Write new galfit config (to update filenames in the uploaded)
-            input_to_galfit(self.target_file, False, regions, 32.5,
+            input_to_galfit(self.target_file, False, regions, self.zero_point,
                             self.config_file, output_fits, output_mask,
                             self.psf.model_file, box, mags)
 
