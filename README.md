@@ -5,10 +5,13 @@ Current dependencies: bash, ds9 able to run through terminal, galfit
   Python libraries: numpy, astropy, pyds9, pyregion
 
 To run download repository and run 
+
 $ python3 galfit_runner.py
+
   This will open up prompt to input a target fits file to start working on
 
 Alternatively, you can give the target fits file path as a command line argument
+
 $ python3 galfit_runner.py path/to/file.fits
 
 Note, the first time you run the program it will ask you to input a path to your galfit executable
