@@ -3,10 +3,6 @@
 
 from astropy.io import fits
 import os
-import pyds9
-import pyregion
-import numpy as np
-import math
 from region_to_config import input_to_galfit
 import subprocess
 import shutil
@@ -25,6 +21,7 @@ class Sersic():
         config_file: path to galfit configuration file for a point source
         config_output_file: path to fits file outputted by galfit (4 frames)
         mask: path to mask fits file for galfit
+        constraint_file: path to constraint file for galfit
         psf: instance of psf class
 
     Methods:
@@ -34,12 +31,15 @@ class Sersic():
         visualize: opens up psf model in ds9
         upload_config: copies uploaded config to dir and loads it to instance
         upload_model: copies uploaded model to dir and loads it to instance
+        upload_constraint: copies uploaded constraint to dir and loads it
         config_to_region: converts current config file back into ds9 regions
+        add_constraint: creates a galfit constraint file
+        remove_constraint: removes a galfit constraint file
     '''
     def __init__(self, filter: str, target_file: str, ouput_dir: str,
                  galfit_path: str, target_filename: str, zero_point: float,
                  config_file: str|None =None, config_output_file: str|None =None,
-                 mask: str|None =None, psf=None):
+                 mask: str|None =None, constraint: str|None =None, psf=None):
         self.filter = filter
         self.target_file = target_file
         self.ouput_dir = ouput_dir
@@ -49,6 +49,7 @@ class Sersic():
         self.config_file = config_file
         self.config_output_file = config_output_file
         self.mask = mask
+        self.constraint_file = constraint
         self.psf = psf
 
     def create_config(self, d) -> None:
@@ -112,17 +113,22 @@ class Sersic():
             # Load in regions
             box, mags = self.config_to_region(d)
             d.set("region shape ellipse")
-            input('Make any wanted changes. Hit enter to optimize')
+            input('Make any wanted changes. Hit enter to continue')
 
             regions = d.get("region")
             # Establish output files
-            self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
             output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
             # Write to galfit config file
             input_to_galfit(self.target_file, False, regions, self.zero_point,
                             self.config_file, output_fits, output_mask,
                             self.psf.model_file, box, mags)
+            # Add constraing based on input
+            add_constraint = input('Add constraint? Hit enter for yes, type no otherwise > ')
+            if add_constraint == 'no':
+                self.remove_constraint()
+            else:
+                self.add_constraint()
             # Optimize with new config file
             self.optimize_config(d)
 
@@ -163,6 +169,7 @@ class Sersic():
 1: Save this model and config
 2: Edit the output config of this model (continue process)
 3: Reset from last stage and edit last config
+Enter anything else to quit
  > '''
                 next_step = input(prompt)
                 if next_step == '1':
@@ -183,6 +190,7 @@ class Sersic():
                 elif next_step == '3':
                     # Remove galfit output config and go back to editing
                     os.remove('galfit.01')
+                    # Continue editing loop
                     self.edit_config(d)
 
             else:
@@ -249,6 +257,28 @@ class Sersic():
         self.config_output_file = self.ouput_dir + self.target_filename + '_config.txt'
         if file != self.config_output_file:
             shutil.copyfile(file, self.config_output_file)
+
+    def upload_constraint(self, file: str) -> None:
+        '''
+        Uploads constraint and copies the file to output directory
+
+        Args:
+            file: path to upload file
+
+        Returns: Nothing
+        '''
+        self.constraint_file = self.ouput_dir + self.target_filename + '_constraint.txt'
+        if file != self.config_output_file:
+            shutil.copyfile(file, self.config_output_file)
+
+        # Update config file
+        with open(self.config_file, 'r') as file:
+            lines = file.readlines()
+        for i, line in enumerate(lines):
+            if 'G)' in line:
+                lines[i] = f'G) {self.constraint_file}\n'
+        with open(self.config_file, 'w') as file:
+            file.writelines(lines)
 
     def config_to_region(self, d) -> tuple[list[int], list[float]]:
         '''
@@ -322,3 +352,90 @@ class Sersic():
         config.close()
 
         return [x_min, x_max, y_min, y_max, x_center, y_center], magnitudes
+    
+    def add_constraint(self) -> None:
+        '''
+        Creates constraint file for galfit config and adds it to config file
+
+        Args: None
+
+        Returns: Nothing
+        '''
+        if self.config_file is None:
+                print('Please create or upload galfit config file first')
+        else:
+            self.constraint_file = self.ouput_dir + self.target_filename + '_constraint.txt'
+
+            config = open(self.config_file, 'r')
+            lines = config.readlines()
+            
+            constraint_lines = []
+            comp_num = 0
+            comp_type = ""
+            for i, line in enumerate(lines):
+                # check for a line that contains the start of a component
+                if 'Component number:' in line:
+                    comp_num += 1
+                words = line.split()
+                # gets the component type (psft, sersic, sky, etc.)
+                if '0)' in line and '=0)' not in line and '10)' not in line:
+                    comp_type = words[1]
+                # excludes sky component type in constraints (and other unsupported types)
+                if comp_type == 'psf' or comp_type == 'sersic' or comp_type == 'moffat':
+                    # constraints the x and y to +/- 1 pixels
+                    if '1)' in line:
+                        constraint_lines.append(f"{comp_num} x -1 1")
+                        constraint_lines.append(f"{comp_num} y -1 1")
+                    # constraints the magnitude to +/- 4 apparent magnitudes
+                    elif '3) ' in line:
+                        constraint_lines.append(f"{comp_num} 3 -4 4")
+                    # excludes psf component type, since other constraints don't apply
+                    if comp_type == 'sersic' or comp_type == 'moffat':
+                        # constraints the FWHM by +/- 10% of value
+                        if '4) ' in line:
+                            a = float(words[1])
+                            constraint_lines.append(f"{comp_num} 4 -{0.1*a:.5f} {0.1*a:.5f}")
+                        # constraints the sersic index/moffat powerlaw to +/- 10% of value
+                        if '5) ' in line:
+                            index = float(words[1])
+                            constraint_lines.append(f"{comp_num} 5 -{0.1*index:.5f} {0.1*index:.5f}")
+                        # constraints the axis ratio to +/- 10% of value
+                        elif '9) ' in line:
+                            b_over_a = float(words[1])
+                            constraint_lines.append(f"{comp_num} 9 -{0.1*b_over_a:.5f} {0.1*b_over_a:.5f}")
+                        # constraints the rotation to +/- 5 degrees
+                        elif '10) ' in line:
+                            constraint_lines.append(f"{comp_num} 10 -5 5")
+                # Add constraint to config
+                if 'G)' in line:
+                    lines[i] = f'G) {self.constraint_file}\n'
+            config.close()
+            # Write update to config file
+            with open(self.config_file, 'w') as file:
+                file.writelines(lines)
+            # creates a text file from list of constraints     
+            constraint_contents = "\n".join(constraint_lines)
+            with open(self.constraint_file, 'w') as h:
+                h.write("\n".join(constraint_lines))
+
+    def remove_constraint(self) -> None:
+        '''
+        Removes constraint file
+
+        Args: None
+
+        Returns: Nothing
+        '''
+        if self.constraint_file is not None:
+
+            if os.path.exists(self.constraint_file):
+                os.remove(self.constraint_file)
+            self.constraint_file = None
+            # Update config file
+            with open(self.config_file, 'r') as file:
+                lines = file.readlines()
+            for i, line in enumerate(lines):
+                if 'G)' in line:
+                    lines[i] = 'G) none\n'
+            with open(self.config_file, 'w') as file:
+                file.writelines(lines)

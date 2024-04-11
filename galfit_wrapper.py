@@ -25,11 +25,14 @@ def take_action(action: str) -> None:
                'psf visualize': psf_visualize,
                'psf upload': psf_upload,
                'sersic create config': sersic_create_config,
+               'sersic add constraint': sersic_add_constraint,
+               'sersic remove constraint': sersic_remove_constraint,
                'sersic edit config': sersic_edit_config,
                'sersic optimize config': sersic_optimize,
                'sersic visualize': sersic_visualize,
                'sersic upload config': sersic_upload_config,
                'sersic upload model': sersic_upload_model,
+               'sersic upload constraint': sersic_upload_constraint,
                'mult fits': mult_fits}
     if action not in actions:
         print('Unkown command. Type help for assistance')
@@ -54,10 +57,13 @@ def help():
 
     sersic create config
     sersic edit config
+    sersic add constraint
+    sersic remove constraint
     sersic optimize config
     sersic visualize
     sersic upload config
     sersic upload model
+    sersic upload constraint
     '''
     print(text)
 
@@ -108,6 +114,18 @@ def sersic_create_config():
     '''
     sersic.create_config(d)
 
+def sersic_add_constraint():
+    '''
+    Creates constraint file for sersic config
+    '''
+    sersic.add_constraint()
+
+def sersic_remove_constraint():
+    '''
+    Removes constraint file for sersic config
+    '''
+    sersic.remove_constraint()
+
 def sersic_edit_config():
     '''
     Edit a created or uploaded model config
@@ -139,6 +157,13 @@ def sersic_upload_model():
     '''
     model_file = my_filebrowser()
     sersic.upload_model(model_file)
+
+def sersic_upload_constraint():
+    '''
+    Uploads constraint txt file, copying it to output dir
+    '''
+    constraint_file = my_filebrowser()
+    sersic.upload_constraint(constraint_file)
 
 def mult_fits():
     '''
@@ -187,6 +212,7 @@ if __name__ == '__main__':
     psf_mask = None
     sersic_config_file = None
     sersic_config_output_file = None
+    sersic_constraint = None
     sersic_mask = None
     # Check for zero point file
     if not os.path.exists(path_to_output + 'zero_point.txt'):
@@ -222,6 +248,9 @@ if __name__ == '__main__':
         if file == target_filename + '_model.fits':
             sersic_config_output_file = path_to_output + file
 
+        if file == target_filename + '_constraint.txt':
+            sersic_constraint = path_to_output + file
+
         if file == target_filename + '_mask.fits':
             sersic_mask = path_to_output + file
         
@@ -231,7 +260,7 @@ if __name__ == '__main__':
                 psf_config_output_file, psf_model_file, psf_mask)
     sersic = Sersic('?', target_path, path_to_output, path_to_galfit,
                 target_filename, zero_point, sersic_config_file,
-                sersic_config_output_file, sersic_mask, psf)
+                sersic_config_output_file, sersic_mask, sersic_constraint, psf)
 
     # Initialize event loop
     print('Welcome to galfit wrapper. Type help for assistance')
