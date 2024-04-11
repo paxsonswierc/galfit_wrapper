@@ -169,7 +169,6 @@ class Sersic():
 1: Save this model and config
 2: Edit the output config of this model (continue process)
 3: Reset from last stage and edit last config
-Enter anything else to quit
  > '''
                 next_step = input(prompt)
                 if next_step == '1':
