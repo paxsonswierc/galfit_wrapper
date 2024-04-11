@@ -14,6 +14,7 @@ Python libraries:
  * [astropy](https://www.astropy.org/)
  * [pyds9](https://github.com/ericmandel/pyds9)
  * [pyregion](https://github.com/astropy/pyregion)
+ * [sep](https://github.com/kbarbary/sep)
 
 ## Running galfit wrapper
 
