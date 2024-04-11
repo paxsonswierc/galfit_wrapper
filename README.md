@@ -1,17 +1,19 @@
 # Welcome to galfit_wrapper!
 
+![Python version](https://img.shields.io/badge/Python-3.10-green.svg?style=flat)
+
 ## Current dependencies:
 
 System/Executables: 
  * bash
- * ds9 able to run through terminal
- * galfit
+ * [ds9](https://sites.google.com/cfa.harvard.edu/saoimageds9/download) (able to run through terminal)
+ * [galfit](https://users.obs.carnegiescience.edu/peng/work/galfit/galfit.html)
 
 Python libraries: 
- * numpy
- * astropy
- * pyds9
- * pyregion
+ * [numpy](https://numpy.org/install/)
+ * [astropy](https://www.astropy.org/)
+ * [pyds9](https://github.com/ericmandel/pyds9)
+ * [pyregion](https://github.com/astropy/pyregion)
 
 ## Running galfit wrapper
 
@@ -46,4 +48,4 @@ as possible. We are working on a fix for this, but please use the previous tempo
 * In terminal text editing option for config files
 * Better multi band support (rgb images, automatic propogation between bands, etc.)
 
-## Feel free to log any crashes or bugs in issues! Reach out to pswierc@uchicago.edu or Paxson on slack for help
+### Feel free to log any crashes or bugs in issues! Reach out to pswierc@uchicago.edu or Paxson on slack for help
