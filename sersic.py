@@ -267,8 +267,8 @@ class Sersic():
         Returns: Nothing
         '''
         self.constraint_file = self.ouput_dir + self.target_filename + '_constraint.txt'
-        if file != self.config_output_file:
-            shutil.copyfile(file, self.config_output_file)
+        if file != self.constraint_file:
+            shutil.copyfile(file, self.constraint_file)
 
         # Update config file
         with open(self.config_file, 'r') as file:
