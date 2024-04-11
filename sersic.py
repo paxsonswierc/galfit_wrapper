@@ -430,6 +430,10 @@ class Sersic():
             if os.path.exists(self.constraint_file):
                 os.remove(self.constraint_file)
             self.constraint_file = None
+
+        if self.config_file is None:
+            print('Please create or upload galfit config file first')
+        else:
             # Update config file
             with open(self.config_file, 'r') as file:
                 lines = file.readlines()
