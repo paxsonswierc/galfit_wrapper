@@ -17,44 +17,48 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
         sky_level = np.median(fits_data)
 
         component_lines = [
-            f"#Component number: {component_number}",
+            f"# Component number: {component_number}",
             "0) sky",
-            f"1) {sky_level} 1"
+            f"1) {sky_level} 1",
+            "\n"
         ]
         return '\n'.join(component_lines)
     # creates lines for psf component
     def create_psf_component(component_number, x, y):
         component_lines = [
-            f"#Component number: {component_number}", 
+            f"# Component number: {component_number}", 
             "0) psf", 
             f"1) {x} {y} 1 1", 
-            "3) 23 1"
+            "3) 23 1",
+            "\n"
         ]
         return '\n'.join(component_lines)
     # creates lines for moffat component
     def create_moffat_component(compenent_number, x, y, a, b, angle, magnitude):
         component_lines = [
-            f"#Component number: {component_number}",
+            f"# Component number: {component_number}",
             "0) moffat",
             f"1) {x} {y} 1 1",
             f"3) {magnitude} 1",
             f"4) {max(a, b)} 1",
             "5) 3 1",
             f"9) {b/a} 1",
-            f"10) {(angle + 90) % 360} 1"
+            f"10) {(angle + 90) % 360} 1",
+            "\n"
         ]
         return "\n".join(component_lines)
     # creates lines for sersic component
     def create_sersic_component(component_number, x, y, a, b, angle, magnitude):
         component_lines = [ 
-            f"#Component number: {component_number}",
+            f"# Component number: {component_number}",
             "0) sersic",
             f"1) {x} {y} 1 1",
             f"3) {magnitude} 1",
             f"4) {a} 1",
             "5) 2 1",
             f"9) {b/a} 1",
-            f"10) {(angle + 90) % 360} 1"
+            f"10) {(angle + 90) % 360} 1",
+            "\n"
         ]
         return "\n".join(component_lines)
     
