@@ -127,21 +127,26 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
                 # get x,y of point
                 x,y = region.coord_list
                 # source extraction with sigma=5
-                sep_data = fits_data.astype(np.float64)
-                bkg = sep.Background(sep_data)
-                objects = sep.extract(sep_data-bkg, 1.5)
-                # find source closest to point region source, get its center and (major axis) radius
-                xs,ys = objects["x"],objects["y"]
-                minxy = np.argmin(np.sqrt((xs-x)**2+(ys-y)**2))
-                crx,cry,a = objects["x"][minxy],objects["y"][minxy],objects["a"][minxy]
-                crx,cry = crx+1,cry+1
-                # calculate magnitude of the star
-                Y, X = np.ogrid[:len(fits_data),:len(fits_data[0])]
-                dist_from_center = np.sqrt((X-crx)**2 + (Y-cry)**2)
-                small_regions_mask_mag = dist_from_center <= a
-                sum_pixels = (np.sum(fits_data*small_regions_mask_mag.astype(int))) * 2     # why is this *2???
-                magnitude = (-2.5 * np.log10(sum_pixels)) + zpt
-                component_regions.append(create_moffat_component(component_number, crx, cry, a, a, 0, magnitude))
+                try:
+                    sep_data = fits_data.astype(np.float64)
+                    bkg = sep.Background(sep_data)
+                    objects = sep.extract(sep_data-bkg, 1.5)
+                    # find source closest to point region source, get its center and (major axis) radius
+                    xs,ys = objects["x"],objects["y"]
+                    minxy = np.argmin(np.sqrt((xs-x)**2+(ys-y)**2))
+                    crx,cry,a = objects["x"][minxy],objects["y"][minxy],objects["a"][minxy]
+                    crx,cry = crx+1,cry+1
+                    # calculate magnitude of the star
+                    Y, X = np.ogrid[:len(fits_data),:len(fits_data[0])]
+                    dist_from_center = np.sqrt((X-crx)**2 + (Y-cry)**2)
+                    small_regions_mask_mag = dist_from_center <= a
+                    sum_pixels = (np.sum(fits_data*small_regions_mask_mag.astype(int))) * 2
+                    magnitude = (-2.5 * np.log10(sum_pixels)) + zpt
+                    component_regions.append(create_moffat_component(component_number, crx, cry, a, a, 0, magnitude))
+                except:
+                    # if source extractor fails, then estimate magnitude at zeropoint-10 with radius (1 arcsec)*(pixels/arcsecond)
+                    component_regions.append(create_moffat_component(component_number, x, y, 1/ps_x, 1/ps_y, 0, zpt-10))
+                
                 component_number += 1
             if region.name == 'box':
                 # calculate box for psf and ps, and create lines for file
