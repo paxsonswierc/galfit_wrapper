@@ -32,7 +32,7 @@ $ python3 galfit_wrapper.py path/to/file.fits
 Note, the first time you run the program it will ask you to input a path to your galfit executable
 and to an output directory. The output directory is where all output models/config files will be saved.
 If you ever want to change these or you input them wrong, you can edit the two paths in path_config.txt
-Alternatively, you can just delete all text from path_config.txt and galfit wrapper will as your input
+Alternatively, you can just delete all text from `path_config.txt` and galfit wrapper will as your input
 again next time you run it.
 
 For a list of commands, type help into tui
