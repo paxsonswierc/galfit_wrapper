@@ -23,18 +23,18 @@ def take_action(action: str) -> None:
                'change zero point': edit_zero_point,
                'psf create': psf_write_config,
                'psf visualize': psf_visualize,
-               'psf upload': psf_upload,
                'psf flags': psf_flags,
+               'psf upload': psf_upload,
                'sersic create config': sersic_create_config,
                'sersic add constraint': sersic_add_constraint,
                'sersic remove constraint': sersic_remove_constraint,
                'sersic edit config': sersic_edit_config,
                'sersic optimize config': sersic_optimize,
                'sersic visualize': sersic_visualize,
+               'sersic flags': sersic_flags,
                'sersic upload config': sersic_upload_config,
                'sersic upload model': sersic_upload_model,
                'sersic upload constraint': sersic_upload_constraint,
-               'sersic flags': sersic_flags,
                'mult fits': mult_fits}
     if action not in actions:
         print('Unkown command. Type help for assistance')
@@ -55,8 +55,8 @@ def help():
 
     psf create
     psf visualize
-    psf upload
     psf flags
+    psf upload
 
     sersic create config
     sersic edit config
@@ -64,10 +64,10 @@ def help():
     sersic remove constraint
     sersic optimize config
     sersic visualize
+    sersic flags
     sersic upload config
     sersic upload model
     sersic upload constraint
-    sersic flags
     '''
     print(text)
 
@@ -105,18 +105,18 @@ def psf_visualize():
     '''
     psf.visualize(d)
 
+def psf_flags():
+    '''
+    Prints out any flags in existing psf galfit file
+    '''
+    psf.flags()
+
 def psf_upload():
     '''
     Opens prompt to upload psf fits file, copying it to output dir
     '''
     psf_file = my_filebrowser()
     psf.upload_psf(psf_file)
-
-def psf_flags():
-    '''
-    Prints out any flags in existing psf galfit file
-    '''
-    psf.flags()
 
 def sersic_create_config():
     '''
@@ -154,6 +154,12 @@ def sersic_visualize():
     '''
     sersic.visualize(d)
 
+def sersic_flags():
+    '''
+    Prints out any flags in existing model galfit file
+    '''
+    sersic.flags()
+
 def sersic_upload_config():
     '''
     Uploads model config file, copying it to output dir
@@ -174,12 +180,6 @@ def sersic_upload_constraint():
     '''
     constraint_file = my_filebrowser()
     sersic.upload_constraint(constraint_file)
-
-def sersic_flags():
-    '''
-    Prints out any flags in existing model galfit file
-    '''
-    sersic.flags()
 
 def mult_fits():
     '''

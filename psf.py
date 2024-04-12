@@ -27,6 +27,7 @@ class PSF():
         write_config: creates galfit config file with ds9 
         visualize: opens up psf model in ds9
         upload_psf: copies uploaded psf model to dir and loads it to instance
+        flags: prints flags from galfit model
     '''
     def __init__(self, filter: str, target_file: str, ouput_dir: str,
                  galfit_path: str, target_filename: str, zero_point: float,
