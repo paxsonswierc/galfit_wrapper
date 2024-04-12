@@ -3,6 +3,7 @@
 
 import os
 import sys
+import shutil
 import pyds9
 from astropy.io import fits
 from psf import PSF
@@ -221,6 +222,10 @@ if __name__ == '__main__':
     if not os.path.exists(path_to_output):
         # Should only happen when user manually changes path_config.txt
         os.makedirs(path_to_output)
+    # Copy target file to output dir
+    if not os.path.exists(path_to_output + os.path.basename(target_path)):
+        shutil.copyfile(target_path, path_to_output + os.path.basename(target_path))
+    target_path = path_to_output + os.path.basename(target_path)
     # Initialize possible data as None
     psf_config_file = None
     psf_config_output_file = None
