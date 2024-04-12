@@ -194,7 +194,10 @@ class Sersic():
                     self.edit_config(d)
 
             else:
-                print('Galfit crashed. Please edit/remake config file and try again.')
+                if os.path.exists(output_fits):
+                    print('Corrupted output. Check for buffer overflow.\nMay have to do with output directory path or target fits file path being too long.')
+                else:
+                    print('Galfit crashed. Please edit/remake config file and try again.')
 
     def visualize(self, d) -> None:
         '''
