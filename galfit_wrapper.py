@@ -24,6 +24,7 @@ def take_action(action: str) -> None:
                'psf create': psf_write_config,
                'psf visualize': psf_visualize,
                'psf upload': psf_upload,
+               'psf flags': psf_flags,
                'sersic create config': sersic_create_config,
                'sersic add constraint': sersic_add_constraint,
                'sersic remove constraint': sersic_remove_constraint,
@@ -33,6 +34,7 @@ def take_action(action: str) -> None:
                'sersic upload config': sersic_upload_config,
                'sersic upload model': sersic_upload_model,
                'sersic upload constraint': sersic_upload_constraint,
+               'sersic flags': sersic_flags,
                'mult fits': mult_fits}
     if action not in actions:
         print('Unkown command. Type help for assistance')
@@ -54,6 +56,7 @@ def help():
     psf create
     psf visualize
     psf upload
+    psf flags
 
     sersic create config
     sersic edit config
@@ -64,6 +67,7 @@ def help():
     sersic upload config
     sersic upload model
     sersic upload constraint
+    sersic flags
     '''
     print(text)
 
@@ -107,6 +111,12 @@ def psf_upload():
     '''
     psf_file = my_filebrowser()
     psf.upload_psf(psf_file)
+
+def psf_flags():
+    '''
+    Prints out any flags in existing psf galfit file
+    '''
+    psf.flags()
 
 def sersic_create_config():
     '''
@@ -164,6 +174,12 @@ def sersic_upload_constraint():
     '''
     constraint_file = my_filebrowser()
     sersic.upload_constraint(constraint_file)
+
+def sersic_flags():
+    '''
+    Prints out any flags in existing model galfit file
+    '''
+    sersic.flags()
 
 def mult_fits():
     '''

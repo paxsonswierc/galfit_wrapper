@@ -164,3 +164,46 @@ class PSF():
             data = hdul[2].data
             fits.writeto(output_model, data, overwrite=True)
         self.model_file = output_model
+
+    def flags(self) -> None:
+        '''
+        Finds all model files in the directory, including PSF/full models,
+        and prints out flags for each file that give information about
+        the galfit optimization process.
+
+        Args: None
+
+        Returns: Nothing
+        '''
+        # dictionary containing meanings of all possible flags
+        flag_dict = {
+                    "1": "Maximum number of iterations reached.  Quit out early.",
+                    "2": "Suspected numerical convergence error in current solution.",
+                    "A-1": "No input data image found. Creating model only.",
+                    "A-2": "PSF image not found.  No convolution performed.",
+                    "A-3": "No CCD diffusion kernel found or applied.",
+                    "A-4": "No bad pixel mask image found.",
+                    "A-5": "No sigma image found.",
+                    "A-6": "No constraint file found.",
+                    "C-1": "Error parsing the constraint file.",
+                    "C-2": "Trying to constrain a parameter that is being held fixed.",
+                    "H-1": "Exposure time header keyword is missing.  Default to 1 second.",
+                    "H-2": "Exposure time is zero seconds.  Default to 1 second.",
+                    "H-3": "GAIN header information is missing.",
+                    "H-4": "NCOMBINE header information is missing.",
+                    "I-1": "Convolution PSF exceeds the convolution box.",
+                    "I-2": "Fitting box exceeds image boundary.",
+                    "I-3": "Some pixels have infinite ADUs; set to 0.",
+                    "I-4": "Sigma image has zero or negative pixels; set to 1e10.",
+                    "I-5": "Pixel mask is not same size as data image."
+                    }
+
+        if self.config_output_file is None:
+            print("Please upload or create psf model first")
+        else:
+            hdulist = fits.open(self.config_output_file)
+            galfitheader = hdulist[2].header
+            galfit_flags = galfitheader["FLAGS"].split()
+            for flag in galfit_flags:
+                print("-",flag_dict[flag])
+            print()
