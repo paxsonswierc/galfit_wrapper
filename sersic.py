@@ -35,6 +35,7 @@ class Sersic():
         config_to_region: converts current config file back into ds9 regions
         add_constraint: creates a galfit constraint file
         remove_constraint: removes a galfit constraint file
+        flags: prints flags from galfit model
     '''
     def __init__(self, filter: str, target_file: str, ouput_dir: str,
                  galfit_path: str, target_filename: str, zero_point: float,
