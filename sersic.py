@@ -157,7 +157,7 @@ class Sersic():
             subprocess.run(['/bin/bash', '-c', self.galfit_path+" "+self.config_file])
             print('Fitting finished')
             # Check if galfit was successful
-            if os.path.exists(output_fits):
+            if os.path.exists(output_fits) and os.path.exists('galfit.01'):
                 print("galfit run done, loading into DS9...")
                 # Open output in ds9
                 d.set("mecube new " + output_fits)
