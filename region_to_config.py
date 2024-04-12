@@ -121,6 +121,23 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
     # if not psf, do galfit regions as normal (exclude=mask,point=psf,circle=moffat,ellipse=sersic)
     if psf:
         points = 0
+        # Loop once to get box params
+        for region in regions:
+            if region.name == 'box':
+                # calculate box for psf and ps, and create lines for file
+                cx, cy, x, y, _ = region.coord_list
+                xmin,xmax,ymin,ymax = int(np.round(cx-x/2)),int(np.round(cx+x/2)),int(np.round(cy-y/2)),int(np.round(cy+y/2))
+                ps_x,ps_y = 3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5,3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5
+                info_lines = [
+                    f"H) {xmin} {xmax} {ymin} {ymax}",
+                    f"I) {xmax-xmin+1} {ymax-ymin+1}",
+                    f"J) {zpt}",
+                    f"K) {ps_x} {ps_y}",
+                    "O) regular",
+                    "P) 0",
+                    "\n"
+                ]
+        # Loop again to get rest of info
         for region in regions:
             if region.name == "point":
                 points = -1
@@ -148,20 +165,7 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
                     component_regions.append(create_moffat_component(component_number, x, y, 1/ps_x, 1/ps_y, 0, zpt-10))
                 
                 component_number += 1
-            if region.name == 'box':
-                # calculate box for psf and ps, and create lines for file
-                cx, cy, x, y, _ = region.coord_list
-                xmin,xmax,ymin,ymax = int(np.round(cx-x/2)),int(np.round(cx+x/2)),int(np.round(cy-y/2)),int(np.round(cy+y/2))
-                ps_x,ps_y = 3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5,3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5
-                info_lines = [
-                    f"H) {xmin} {xmax} {ymin} {ymax}",
-                    f"I) {xmax-xmin+1} {ymax-ymin+1}",
-                    f"J) {zpt}",
-                    f"K) {ps_x} {ps_y}",
-                    "O) regular",
-                    "P) 0",
-                    "\n"
-                ]
+            
             # elif region.name == "point" and points != 0:
             #     print("only one point region can be used for PSF!")
             elif region.__dict__["exclude"]:
