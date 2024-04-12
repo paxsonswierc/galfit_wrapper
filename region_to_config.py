@@ -90,8 +90,8 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
     header = hdulist_fits[0].header
     hdulist_fits.close()
 
+    ps_x,ps_y = 3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5,3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5
     if pre_box:
-        ps_x,ps_y = 3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5,3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5
         info_lines = [
             f"H) {pre_box[0]} {pre_box[1]} {pre_box[2]} {pre_box[3]}",
             f"I) {pre_box[4]} {pre_box[5]}",
