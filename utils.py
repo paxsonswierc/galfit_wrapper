@@ -26,7 +26,7 @@ def get_paths() -> tuple[str, str, str]:
     '''
     Reads in paths from path_config.txt
     '''
-    paths_file = open('path_config.txt')
+    paths_file = open('path_config.txt', 'w')
     paths = paths_file.readlines()
     # If config empty, prompt input
     if len(paths) == 0:
