@@ -26,7 +26,10 @@ def get_paths() -> tuple[str, str, str]:
     '''
     Reads in paths from path_config.txt
     '''
-    paths_file = open('path_config.txt', 'w')
+    if not os.path.exists('path_config.txt'):
+        paths_file = open('path_config.txt', 'w')
+        paths_file.close()
+    paths_file = open('path_config.txt')
     paths = paths_file.readlines()
     # If config empty, prompt input
     if len(paths) == 0:
@@ -37,7 +40,6 @@ def get_paths() -> tuple[str, str, str]:
     path_to_galfit = paths[0]#[:-1]
     #path_to_output = paths[1]
     path_to_output = os.path.expanduser('~/gf_out/')
-    print(path_to_output)
     if not os.path.exists(path_to_output):
         os.makedirs(path_to_output)
     # Get directory where galfit will dump config files
