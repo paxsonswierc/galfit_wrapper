@@ -49,4 +49,4 @@ as possible. We are working on a fix for this, but please use the previous tempo
 * In terminal text editing option for config files
 * Better multi band support (rgb images, automatic propogation between bands, etc.)
 
-### Feel free to log any crashes or bugs in issues! Reach out to pswierc@uchicago.edu or Paxson on slack for help
+### Feel free to log any crashes or bugs in issues! Reach out to authors pswierc@uchicago.edu / babnigg@uchicago.edu or Paxson / Daniel B on slack for help
