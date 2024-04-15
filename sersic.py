@@ -50,7 +50,10 @@ class Sersic():
         self.config_file = config_file
         self.config_output_file = config_output_file
         self.mask = mask
-        self.constraint_file = constraint
+        if constraint is None:
+            self.constraint_file = 'none'
+        else:
+            self.constraint_file = constraint
         self.psf = psf
 
     def create_config(self, d) -> None:
@@ -86,7 +89,8 @@ class Sersic():
             # Set galfit config file
             input_to_galfit(self.target_file, False, regions, self.zero_point,
                             self.config_file, output_fits, output_mask,
-                            self.psf.model_file, False, False)
+                            self.psf.model_file, False, False, False, [0]*4,
+                            self.constraint_file)
             # Get rid of regions
             d.set('region select all')
             d.set('region delete select')
@@ -112,10 +116,19 @@ class Sersic():
             d.set("scale mode 99.5")
             d.set("mode region")
             # Load in regions
-            box, mags = self.config_to_region(d)
+            box, mags, psf_mags, sky_info = self.config_to_region(d)
             d.set("region shape ellipse")
-            input('Make any wanted changes. Hit enter to continue')
-
+            # Constrained changes
+            input(f'Make any changes to existing regions or manually edit config text file (located at {self.config_file}). Hit enter to continue')
+            # Add constraing based on input
+            add_constraint = input('Add constraint? Hit enter for yes, type no otherwise > ')
+            if add_constraint == 'no':
+                self.remove_constraint()
+            else:
+                self.add_constraint()
+            # Give option to add new regions
+            input('Add any new regions now. Hit enter to continue')
+            # Get regions
             regions = d.get("region")
             # Establish output files
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
@@ -123,13 +136,8 @@ class Sersic():
             # Write to galfit config file
             input_to_galfit(self.target_file, False, regions, self.zero_point,
                             self.config_file, output_fits, output_mask,
-                            self.psf.model_file, box, mags)
-            # Add constraing based on input
-            add_constraint = input('Add constraint? Hit enter for yes, type no otherwise > ')
-            if add_constraint == 'no':
-                self.remove_constraint()
-            else:
-                self.add_constraint()
+                            self.psf.model_file, box, mags, psf_mags, sky_info,
+                            self.constraint_file)
             # Optimize with new config file
             self.optimize_config(d)
 
@@ -234,7 +242,7 @@ class Sersic():
             if file != self.config_file:
                 shutil.copyfile(file, self.config_file)
             # Convert config to regions to get info on box size
-            box, mags = self.config_to_region(d)
+            box, mags, psf_mags, sky_info = self.config_to_region(d)
 
             regions = d.get("region")
             # Establish filenames
@@ -244,7 +252,8 @@ class Sersic():
             # Write new galfit config (to update filenames in the uploaded)
             input_to_galfit(self.target_file, False, regions, self.zero_point,
                             self.config_file, output_fits, output_mask,
-                            self.psf.model_file, box, mags)
+                            self.psf.model_file, box, mags, psf_mags, sky_info,
+                            self.constraint_file)
 
     def upload_model(self, file: str) -> None:
         '''
@@ -294,6 +303,8 @@ class Sersic():
         d.set("scale mode 99.5")
         # Keep track of magnitudes of all components
         magnitudes = []
+        psf_magnitudes = []
+        sky_info = [0, 0, 0, 0]
         config = open(self.config_file, 'r')
         lines = config.readlines()
 
@@ -335,10 +346,27 @@ class Sersic():
                         # Get position info
                         x = float(words[1])
                         y = float(words[2])
+                    elif '3)' in component_line:
+                        # Get magnitude info
+                        psf_magnitudes.append(float(words[1]))
                     if '0)' in component_line or component_line == lines[-1]:
                         # Set region
                         d.set(f'region command "point {x} {y}"')
                         break
+            if '0) sky' in line:
+                for component_line in lines[i+1:]:
+                    words = component_line.split()
+                    if '1)' in component_line:
+                        sky_info[3] = float(words[1])
+                    elif '2)' in component_line:
+                        sky_info[0] = float(words[1])
+                        sky_info[2] = int(words[2])
+                    elif '3)' in component_line:
+                        sky_info[1] = float(words[1])
+                        sky_info[2] = int(words[2])
+                    if '0)' in component_line or component_line == lines[-1]:
+                        break
+                    
             if 'H)' in line:
                 words = line.split()
                 # Save box information
@@ -353,8 +381,8 @@ class Sersic():
                 y_center = int(words[2])
 
         config.close()
-
-        return [x_min, x_max, y_min, y_max, x_center, y_center], magnitudes
+        return [x_min, x_max, y_min, y_max, x_center, y_center],\
+                magnitudes, psf_magnitudes, sky_info
     
     def add_constraint(self) -> None:
         '''
@@ -429,11 +457,11 @@ class Sersic():
 
         Returns: Nothing
         '''
-        if self.constraint_file is not None:
+        if self.constraint_file != 'none':
 
             if os.path.exists(self.constraint_file):
                 os.remove(self.constraint_file)
-            self.constraint_file = None
+            self.constraint_file = 'none'
 
         if self.config_file is None:
             print('Please create or upload galfit config file first')

@@ -9,27 +9,33 @@ import sep
 
 # function for fits file and regions -> galfit file, for both psf and normal galfit
 def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
-                    mask_file, psf_file, pre_box, pre_mags):
+                    mask_file, psf_file, pre_box, pre_mags, pre_psf_mags,
+                    sky_info, constraint_file):
   
     #mask_file = 'none'
     # creates lines for sky component
-    def create_sky_component(component_number, fits_data):
-        sky_level = np.median(fits_data)
+    def create_sky_component(component_number, fits_data, sky_info):
+        if sky_info[3] == 0:
+            sky_level = np.median(fits_data)
+        else:
+            sky_level = sky_info[3]
 
         component_lines = [
             f"# Component number: {component_number}",
             "0) sky",
             f"1) {sky_level} 1",
+            f"2) {sky_info[0]} {sky_info[2]}",
+            f"3) {sky_info[1]} {sky_info[2]}"
             "\n"
         ]
         return '\n'.join(component_lines)
     # creates lines for psf component
-    def create_psf_component(component_number, x, y):
+    def create_psf_component(component_number, x, y, magnitude):
         component_lines = [
             f"# Component number: {component_number}", 
             "0) psf", 
             f"1) {x} {y} 1 1", 
-            "3) 23 1",
+            f"3) {magnitude} 1",
             "\n"
         ]
         return '\n'.join(component_lines)
@@ -68,7 +74,6 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
     sigma_file = 'none'
     psfSampling = 1
     #mask_file = 'mask.fits'
-    constraint_file = 'none'
 
     file_lines = [
         #f"A) {fits_file[fits_file.rfind('/')+1:]}",
@@ -114,7 +119,7 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
 
 
     # creates sky component
-    component_regions.append(create_sky_component(component_number, fits_data))
+    component_regions.append(create_sky_component(component_number, fits_data, sky_info))
     component_number += 1
 
     # if psf, then use point region and source extractor (sep) to find best center and box region
@@ -177,6 +182,7 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
             print("must provide at least one point region for PSF!")
     else:
         sersic_count = 0
+        psf_count = 0
         for region in regions:
             if region.__dict__['exclude']:
                 region.__dict__['exclude'] = False
@@ -196,7 +202,12 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
                 ]
             elif region.name == 'point':
                 x, y = region.coord_list
-                component_regions.append(create_psf_component(component_number, x, y))
+                if pre_psf_mags and (psf_count+1) <= len(pre_psf_mags):
+                    magnitude = pre_psf_mags[psf_count]
+                    psf_count += 1
+                else:
+                    magnitude = zpt - 10
+                component_regions.append(create_psf_component(component_number, x, y, magnitude))
                 component_number += 1
             elif region.name == 'ellipse':
                 x, y, a, b, angle = region.coord_list
