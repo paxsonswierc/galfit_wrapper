@@ -50,10 +50,7 @@ class Sersic():
         self.config_file = config_file
         self.config_output_file = config_output_file
         self.mask = mask
-        if constraint is None:
-            self.constraint_file = 'none'
-        else:
-            self.constraint_file = constraint
+        self.constraint_file = constraint
         self.psf = psf
 
     def create_config(self, d) -> None:
@@ -87,10 +84,14 @@ class Sersic():
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
             output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
             # Set galfit config file
+            if self.constraint_file is None:
+                constraint = 'none'
+            else:
+                constraint = self.constraint_file
             input_to_galfit(self.target_file, False, regions, self.zero_point,
                             self.config_file, output_fits, output_mask,
                             self.psf.model_file, False, False, False, [0]*4,
-                            self.constraint_file)
+                            constraint)
             # Get rid of regions
             d.set('region select all')
             d.set('region delete select')
@@ -136,10 +137,14 @@ class Sersic():
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
             output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
             # Write to galfit config file
+            if self.constraint_file is None:
+                constraint = 'none'
+            else:
+                constraint = self.constraint_file
             input_to_galfit(self.target_file, False, regions, self.zero_point,
                             self.config_file, output_fits, output_mask,
                             self.psf.model_file, box, mags, psf_mags, sky_info,
-                            self.constraint_file)
+                            constraint)
             # Optimize with new config file
             self.optimize_config(d)
 
@@ -252,10 +257,14 @@ class Sersic():
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
             output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
             # Write new galfit config (to update filenames in the uploaded)
+            if self.constraint_file is None:
+                constraint = None
+            else:
+                constraint = self.constraint_file
             input_to_galfit(self.target_file, False, regions, self.zero_point,
                             self.config_file, output_fits, output_mask,
                             self.psf.model_file, box, mags, psf_mags, sky_info,
-                            self.constraint_file)
+                            constraint)
 
     def upload_model(self, file: str) -> None:
         '''
