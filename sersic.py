@@ -121,7 +121,7 @@ class Sersic():
             box, mags, psf_mags, sky_info = self.config_to_region(d)
             d.set("region shape ellipse")
             # Constrained changes
-            input('\nMake changes to existing regions or add any new regions you may want to constrain. Hit enter to continue')
+            input('\nMake changes to existing regions and add any new regions you may want to constrain. Hit enter to continue')
             # Add constraing based on input
             add_constraint = input('\nAdd constraint? Hit enter for yes, type no otherwise > ')
             if add_constraint == 'no':
