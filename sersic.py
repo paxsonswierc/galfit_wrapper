@@ -67,7 +67,7 @@ class Sersic():
         Returns: Nothing
         '''
         if self.psf.model_file is None:
-            print('Please create or upload psf first')
+            print('\nPlease create or upload psf first')
         else:
             # Open target in ds9
             d.set("fits new "+self.target_file)
@@ -75,12 +75,12 @@ class Sersic():
             d.set("mode region")
             # Prompt user to place ellipse region for galaxies
             d.set("region shape ellipse")
-            input('Place ellipses for galaxies. Hit enter when region is placed\n')
+            input('\nPlace ellipses for galaxies. Hit enter when region is placed')
             # Prompt user to place point region for psf component
             d.set("region shape point")
-            input('Place point for point sources. Hit enter when region is placed\n')
+            input('\nPlace point for point sources. Hit enter when region is placed')
             d.set("region shape box")
-            input('Place box for frame. Hit enter when region is placed\n')
+            input('\nPlace box for frame. Hit enter when region is placed')
             regions = d.get("region")
             # Establish filenames
             self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
@@ -95,7 +95,7 @@ class Sersic():
             d.set('region select all')
             d.set('region delete select')
             # Optimize with galfit config
-            optimize = input('Run galfit for this config? Hit enter for yes, type no otherwise > ')
+            optimize = input('\nRun galfit for this config? Hit enter for yes, type no otherwise > ')
             if optimize != 'no':
                 self.optimize_config(d)
 
@@ -109,27 +109,27 @@ class Sersic():
         Returns: Nothing
         '''
         if self.config_file is None:
-            print('Please create config file first')
+            print('\nPlease create config file first')
         else:
             # Open target in ds9
             d.set("fits new "+self.target_file)
             d.set("scale mode 99.5")
             d.set("mode region")
             # Ask for manual edits first
-            input(f'Please make any manual edits to config text file located at {self.config_file} first. Hit enter to continue')
+            input(f'\nPlease make any manual edits to config text file located at {self.config_file} first. Hit enter to continue')
             # Load in regions
             box, mags, psf_mags, sky_info = self.config_to_region(d)
             d.set("region shape ellipse")
             # Constrained changes
-            input(f'Make any changes to existing regions (these changes will be constrained). Hit enter to continue')
+            input('\nMake any changes to existing regions (these changes will be constrained). Hit enter to continue')
             # Add constraing based on input
-            add_constraint = input('Add constraint? Hit enter for yes, type no otherwise > ')
+            add_constraint = input('\nAdd constraint? Hit enter for yes, type no otherwise > ')
             if add_constraint == 'no':
                 self.remove_constraint()
             else:
                 self.add_constraint()
             # Give option to add new regions
-            input('Add any new regions now (these will not be constrained). Hit enter to continue')
+            input('\nAdd any new regions now (these will not be constrained). Hit enter to continue')
             # Get regions
             regions = d.get("region")
             # Establish output files
@@ -153,7 +153,7 @@ class Sersic():
         Returns: Nothing
         '''
         if self.config_file is None:
-            print('Please create or upload config file first')
+            print('\nPlease create or upload config file first')
         else:
             # Get rid of any previous galfit output config files
             if os.path.exists('galfit.01'):
@@ -165,10 +165,10 @@ class Sersic():
                 os.remove(output_fits)
             # Run galfit
             subprocess.run(['/bin/bash', '-c', self.galfit_path+" "+self.config_file])
-            print('Fitting finished')
+            print('\nFitting finished')
             # Check if galfit was successful
             if os.path.exists(output_fits) and os.path.exists('galfit.01'):
-                print("galfit run done, loading into DS9...")
+                print("\ngalfit run done, loading into DS9...\n")
                 # Open output in ds9
                 d.set("mecube new " + output_fits)
                 d.set("scale mode minmax")
@@ -205,9 +205,9 @@ class Sersic():
 
             else:
                 if os.path.exists(output_fits):
-                    print('Corrupted output. Check for buffer overflow.\nMay have to do with output directory path or target fits file path being too long.')
+                    print('\nCorrupted output. Check for buffer overflow.\nMay have to do with output directory path or target fits file path being too long')
                 else:
-                    print('Galfit crashed. Please edit/remake config file and try again.')
+                    print('\nGalfit crashed. Please edit/remake config file and try again')
 
     def visualize(self, d) -> None:
         '''
@@ -219,7 +219,7 @@ class Sersic():
         Returns: Nothing
         '''
         if self.config_output_file is None:
-            print('Please upload or create sersic model first')
+            print('\nPlease upload or create sersic model first')
         else:
             d.set("mecube new "+ self.config_output_file)
             d.set("scale mode minmax")
@@ -237,7 +237,7 @@ class Sersic():
         Returns: Nothing
         '''
         if self.psf.model_file is None:
-            print('Please create or upload psf first')
+            print('\nPlease create or upload psf first')
         else:
             # Update config filename
             self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
@@ -395,7 +395,7 @@ class Sersic():
         Returns: Nothing
         '''
         if self.config_file is None:
-                print('Please create or upload galfit config file first')
+                print('\nPlease create or upload galfit config file first')
         else:
             self.constraint_file = self.ouput_dir + self.target_filename + '_constraint.txt'
 
@@ -466,7 +466,7 @@ class Sersic():
             self.constraint_file = 'none'
 
         if self.config_file is None:
-            print('Please create or upload galfit config file first')
+            print('\nPlease create or upload galfit config file first')
         else:
             # Update config file
             with open(self.config_file, 'r') as file:
@@ -510,7 +510,7 @@ class Sersic():
                     }
 
         if self.config_output_file is None:
-            print("Please upload or create sersic model first")
+            print("\nPlease upload or create sersic model first\n")
         else:
             hdulist = fits.open(self.config_output_file)
             galfitheader = hdulist[2].header

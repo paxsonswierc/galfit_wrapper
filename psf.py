@@ -60,10 +60,10 @@ class PSF():
         d.set("mode region")
         # Prompt user to place point region on star
         d.set("region shape point")
-        input('Place point for star. Hit enter when region is placed\n')
+        input('\nPlace point for star. Hit enter when region is placed')
         # Prompt user to place box region for area to run model
         d.set("region shape box")
-        input('Place box for frame. Hit enter when region is placed\n')
+        input('\nPlace box for frame. Hit enter when region is placed')
         psf_regions = d.get("region")
         # Establish filenames
         output_config = self.ouput_dir + self.target_filename + '_psf_config.txt'
@@ -73,7 +73,7 @@ class PSF():
         # Set galfit config file
         input_to_galfit(self.target_file, True, psf_regions, self.zero_point,
                         output_config, output_fits, output_mask, 'none',
-                        False, False)
+                        False, False, False, [0]*4, 'none')
         # Delete old regions
         d.set('region select all')
         d.set('region delete select')
@@ -86,7 +86,7 @@ class PSF():
         if os.path.exists(output_fits):
             # Remove galfit output file
             os.remove('galfit.01')
-            print("galfit run done, loading into DS9...")
+            print("\ngalfit run done, loading into DS9...")
             # Load model into ds9
             d.set("mecube new "+output_fits)
             d.set("scale mode minmax")
@@ -94,7 +94,7 @@ class PSF():
             d.set("zoom to fit")
             d.set("cube play")
             # Prompt user to see if model is satisfactory
-            done = input('Are you satisfied? yes/enter to continue, no to restart, or quit > ')
+            done = input('\nAre you satisfied? yes/enter to continue, no to restart, or quit > ')
             if done == 'no':
                 # Repeat process if unsatisfied
                 self.write_config(d)
@@ -110,7 +110,7 @@ class PSF():
                 self.model_file = output_model
 
         else:
-            print('Galfit crashed! Please try again')
+            print('\nGalfit crashed! Please try again')
 
     def visualize(self, d) -> None:
         '''
@@ -124,7 +124,7 @@ class PSF():
         Returns: nothing
         '''
         if self.config_output_file is None and self.model_file is None:
-            print('Please upload or create psf model first')
+            print('\nPlease upload or create psf model first')
         elif self.config_output_file is not None:
             d.set("mecube new "+ self.config_output_file)
             d.set("scale mode minmax")
@@ -200,7 +200,7 @@ class PSF():
                     }
 
         if self.config_output_file is None:
-            print("Please upload or create psf model first")
+            print("\nPlease upload or create psf model first")
         else:
             hdulist = fits.open(self.config_output_file)
             galfitheader = hdulist[2].header
