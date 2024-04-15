@@ -115,11 +115,13 @@ class Sersic():
             d.set("fits new "+self.target_file)
             d.set("scale mode 99.5")
             d.set("mode region")
+            # Ask for manual edits first
+            input(f'Please make any manual edits to config text file located at {self.config_file} first. Hit enter to continue')
             # Load in regions
             box, mags, psf_mags, sky_info = self.config_to_region(d)
             d.set("region shape ellipse")
             # Constrained changes
-            input(f'Make any changes to existing regions or manually edit config text file (located at {self.config_file}). Hit enter to continue')
+            input(f'Make any changes to existing regions (these changes will be constrained). Hit enter to continue')
             # Add constraing based on input
             add_constraint = input('Add constraint? Hit enter for yes, type no otherwise > ')
             if add_constraint == 'no':
@@ -127,7 +129,7 @@ class Sersic():
             else:
                 self.add_constraint()
             # Give option to add new regions
-            input('Add any new regions now. Hit enter to continue')
+            input('Add any new regions now (these will not be constrained). Hit enter to continue')
             # Get regions
             regions = d.get("region")
             # Establish output files
