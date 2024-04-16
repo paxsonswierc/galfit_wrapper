@@ -25,6 +25,7 @@ def take_action(action: str) -> None:
                'target list': list_target,
                'target l': list_target,
                'tl': list_target,
+               'ls': list_target,
                'target visualize': visualize_target,
                'target v': visualize_target,
                'tv': visualize_target,
