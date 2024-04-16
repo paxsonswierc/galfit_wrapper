@@ -611,11 +611,11 @@ class Sersic():
 
         Returns: Nothing
         '''
-        if self.constraint_file != 'none':
+        if self.constraint_file is not None:
 
             if os.path.exists(self.constraint_file):
                 os.remove(self.constraint_file)
-            self.constraint_file = 'none'
+            self.constraint_file = None
 
         if self.config_file is None:
             print('\nPlease create or upload galfit config file first\n')
