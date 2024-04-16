@@ -1,0 +1,3 @@
+<h1>FREQUENTLY ASKED QUESTIONS</h1>
+
+list
