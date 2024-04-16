@@ -28,7 +28,8 @@ class Sersic():
         create_config: creates galfit config file with ds9 
         edit_config: allows editing of current config with ds9
         optimize_config: runs galfit for current config file
-        visualize: opens up psf model in ds9
+        visualize: opens up sersic model in ds9
+        visualize_rgb: opens up target and model rgb images in ds9
         upload_config: copies uploaded config to dir and loads it to instance
         upload_model: copies uploaded model to dir and loads it to instance
         upload_constraint: copies uploaded constraint to dir and loads it
@@ -64,11 +65,14 @@ class Sersic():
         Returns: Nothing
         '''
         if self.psf.model_file is None:
-            print('\nPlease create or upload psf first')
+            print('\nPlease create or upload psf first\n')
         else:
             # Open target in ds9
             d.set("fits new "+self.target_file)
+            d.set("tile no")
+            d.set("cmap 1 0.5")
             d.set("scale mode 99.5")
+            d.set("zoom to fit")
             d.set("mode region")
             # Prompt user to place ellipse region for galaxies
             d.set("region shape ellipse")
@@ -110,11 +114,14 @@ class Sersic():
         Returns: Nothing
         '''
         if self.config_file is None:
-            print('\nPlease create config file first')
+            print('\nPlease create config file first\n')
         else:
             # Open target in ds9
             d.set("fits new "+self.target_file)
+            d.set("tile no")
+            d.set("cmap 1 0.5")
             d.set("scale mode 99.5")
+            d.set("zoom to fit")
             d.set("mode region")
             # Ask for manual edits first
             input(f'\nPlease make any manual edits to config text file located at {self.config_file} first. Hit enter to continue')
@@ -158,7 +165,7 @@ class Sersic():
         Returns: Nothing
         '''
         if self.config_file is None:
-            print('\nPlease create or upload config file first')
+            print('\nPlease create or upload config file first\n')
         else:
             # Get rid of any previous galfit output config files
             if os.path.exists('galfit.01'):
@@ -176,6 +183,8 @@ class Sersic():
                 print("\ngalfit run done, loading into DS9...\n")
                 # Open output in ds9
                 d.set("mecube new " + output_fits)
+                d.set("tile no")
+                d.set("cmap 1 0.5")
                 d.set("scale mode minmax")
                 d.set("mode none")
                 d.set("zoom to fit")
@@ -210,9 +219,9 @@ class Sersic():
 
             else:
                 if os.path.exists(output_fits):
-                    print('\nCorrupted output. Check for buffer overflow.\nMay have to do with output directory path or target fits file path being too long')
+                    print('\nCorrupted output. Check for buffer overflow.\nMay have to do with output directory path or target fits file path being too long\n')
                 else:
-                    print('\nGalfit crashed. Please edit/remake config file and try again')
+                    print('\nGalfit crashed. Please edit/remake config file and try again\n')
 
     def visualize(self, d) -> None:
         '''
@@ -224,13 +233,144 @@ class Sersic():
         Returns: Nothing
         '''
         if self.config_output_file is None:
-            print('\nPlease upload or create sersic model first')
+            print('\nPlease upload or create sersic model first\n')
         else:
             d.set("mecube new "+ self.config_output_file)
+            d.set("tile no")
+            d.set("cmap 1 0.5")
             d.set("scale mode minmax")
             d.set("mode none")
             d.set("zoom to fit")
             d.set("cube play")
+
+    def visualize_rgb(self, rfile: str, gfile: str, bfile: str, single: bool, d) -> None:
+        '''
+        Prompts user to upload 3 multi-band model files to create DS9 r,g,b comparison
+
+        Args:
+            rfile: "red" filter multi-band output file
+            gfile: "green" filter multi-band output file
+            bfile: "blue" filter multi-band output file
+
+        Returns: Nothing
+        '''
+        if single:
+            d.set("tile no")
+            d.set("cmap 1 0.5")
+            d.set("rgb")
+            d.set("rgb lock scale no")
+            d.set("rgb lock colorbar no")
+            d.set("rgb lock scalelimits yes")
+            d.set("rgb red")
+            d.set("scale linear")
+            d.set("scale mode 99.5")
+            d.set(f"fits {rfile}")
+            rscale = d.get("scale limits")
+            d.set("rgb green")
+            d.set("scale linear")
+            d.set("scale mode 99.5")
+            d.set(f"fits {gfile}")
+            gscale = d.get("scale limits")
+            d.set("rgb blue")
+            d.set("scale linear")
+            d.set("scale mode 99.5")
+            d.set(f"fits {bfile}")
+            bscale = d.get("scale limits")
+            d.set("rgb lock scale yes")
+            d.set("rgb lock colorbar yes")
+            d.set("zoom to fit")
+
+            if len(open(self.ouput_dir + 'rgb_info.txt', 'r').read().splitlines()) == 3:
+                with open(self.ouput_dir + 'rgb_info.txt', 'a') as rgb_info:
+                    rgb_info.write(str(rscale)+'\n')
+                    rgb_info.write(str(gscale)+'\n')
+                    rgb_info.write(str(bscale)+'\n')
+        else:
+            # creates temporary files from the multi-band model for RGB frames
+            r_t_fits = self.ouput_dir + self.target_filename + '_r_t.fits'
+            g_t_fits = self.ouput_dir + self.target_filename + '_g_t.fits'
+            b_t_fits = self.ouput_dir + self.target_filename + '_b_t.fits'
+            r_m_fits = self.ouput_dir + self.target_filename + '_r_m.fits'
+            g_m_fits = self.ouput_dir + self.target_filename + '_g_m.fits'
+            b_m_fits = self.ouput_dir + self.target_filename + '_b_m.fits'
+
+            rscale, gscale, bscale = open(self.ouput_dir + 'rgb_info.txt', 'r').read().splitlines()[3:6]
+
+            hdu_r = fits.open(rfile)
+            hdu_g = fits.open(gfile)
+            hdu_b = fits.open(bfile)
+
+            if len(hdu_r) == 4 and len(hdu_g) == 4 and len(hdu_b) == 4:
+                fits.writeto(r_t_fits,data=hdu_r[1].data,header=hdu_r[1].header,overwrite=True)
+                fits.writeto(r_m_fits,data=hdu_r[2].data,header=hdu_r[2].header,overwrite=True)
+                fits.writeto(g_t_fits,data=hdu_g[1].data,header=hdu_g[1].header,overwrite=True)
+                fits.writeto(g_m_fits,data=hdu_g[2].data,header=hdu_g[2].header,overwrite=True)
+                fits.writeto(b_t_fits,data=hdu_b[1].data,header=hdu_b[1].header,overwrite=True)
+                fits.writeto(b_m_fits,data=hdu_b[2].data,header=hdu_b[2].header,overwrite=True)
+
+                d.set("frame delete all")
+                d.set("tile yes")
+                d.set("rgb")
+                d.set("rgb lock scale no")
+                d.set("rgb lock colorbar no")
+                d.set("rgb lock scalelimits yes")
+                d.set("rgb red")
+                d.set("scale linear")
+                d.set("scale mode 99.5")
+                d.set(f"fits {r_t_fits}")
+                d.set("scale limits "+rscale)
+                d.set("rgb green")
+                d.set("scale linear")
+                d.set("scale mode 99.5")
+                d.set(f"fits {g_t_fits}")
+                d.set("scale limits "+gscale)
+                d.set("rgb blue")
+                d.set("scale linear")
+                d.set("scale mode 99.5")
+                d.set(f"fits {b_t_fits}")
+                d.set("scale limits "+bscale)
+                d.set("rgb lock scale yes")
+                d.set("rgb lock colorbar yes")
+
+                d.set("rgb")
+                d.set("rgb lock scale no")
+                d.set("rgb lock colorbar no")
+                d.set("rgb lock scalelimits yes")
+                d.set("rgb red")
+                d.set("scale linear")
+                d.set("scale mode 99.5")
+                d.set(f"fits {r_m_fits}")
+                d.set("scale limits "+rscale)
+                d.set("rgb green")
+                d.set("scale linear")
+                d.set("scale mode 99.5")
+                d.set(f"fits {g_m_fits}")
+                d.set("scale limits "+gscale)
+                d.set("rgb blue")
+                d.set("scale linear")
+                d.set("scale mode 99.5")
+                d.set(f"fits {b_m_fits}")
+                d.set("scale limits "+bscale)
+                d.set("rgb lock scale yes")
+                d.set("rgb lock colorbar yes")
+                d.set("zoom to fit")
+                d.set("frame prev")
+                d.set("zoom to fit")
+
+                os.remove(r_t_fits)
+                os.remove(g_t_fits)
+                os.remove(b_t_fits)
+                os.remove(r_m_fits)
+                os.remove(g_m_fits)
+                os.remove(b_m_fits)
+            else:
+                with open(self.ouput_dir + 'rgb_info.txt') as info_:
+                    lines = info_.readlines()
+                with open(self.ouput_dir + 'rgb_info.txt', 'w') as info:
+                    info.writelines(lines[:6])
+                print("\nUploads must be galfit output multi-band FITS files!\n")
+
+
 
     def upload_config(self, file: str, d) -> None:
         '''
@@ -242,7 +382,7 @@ class Sersic():
         Returns: Nothing
         '''
         if self.psf.model_file is None:
-            print('\nPlease create or upload psf first')
+            print('\nPlease create or upload psf first\n')
         else:
             # Update config filename
             self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
@@ -311,7 +451,10 @@ class Sersic():
         assert self.config_file is not None
         # Open target file into ds9
         d.set("fits new "+self.target_file)
+        d.set("tile no")
+        d.set("cmap 1 0.5")
         d.set("scale mode 99.5")
+        d.set("zoom to fit")
         # Keep track of magnitudes of all components
         magnitudes = []
         psf_magnitudes = []
@@ -404,7 +547,7 @@ class Sersic():
         Returns: Nothing
         '''
         if self.config_file is None:
-                print('\nPlease create or upload galfit config file first')
+                print('\nPlease create or upload galfit config file first\n')
         else:
             self.constraint_file = self.ouput_dir + self.target_filename + '_constraint.txt'
 
@@ -475,7 +618,7 @@ class Sersic():
             self.constraint_file = 'none'
 
         if self.config_file is None:
-            print('\nPlease create or upload galfit config file first')
+            print('\nPlease create or upload galfit config file first\n')
         else:
             # Update config file
             with open(self.config_file, 'r') as file:
@@ -524,6 +667,7 @@ class Sersic():
             hdulist = fits.open(self.config_output_file)
             galfitheader = hdulist[2].header
             galfit_flags = galfitheader["FLAGS"].split()
+            print()
             for flag in galfit_flags:
                 print("-",flag_dict[flag])
             print()

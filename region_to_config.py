@@ -170,16 +170,12 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
                     component_regions.append(create_moffat_component(component_number, x, y, 1/ps_x, 1/ps_y, 0, zpt-10))
                 
                 component_number += 1
-            
-            # elif region.name == "point" and points != 0:
-            #     print("only one point region can be used for PSF!")
             elif region.__dict__["exclude"]:
                 region.__dict__["exclude"] = False
                 excluded_regions_mask += pyregion.get_mask([region], fits_data).astype(int)
-            # else:
-            #     print(region,"will not be used")
+
         if points == 0:
-            print("must provide at least one point region for PSF!")
+            print("\nmust provide at least one point region for PSF!\n")
     else:
         sersic_count = 0
         psf_count = 0

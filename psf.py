@@ -56,7 +56,10 @@ class PSF():
         '''
         # Open ds9 window
         d.set("fits new "+self.target_file)
+        d.set("tile no")
+        d.set("cmap 1 0.5")
         d.set("scale mode 99.5")
+        d.set("zoom to fit")
         d.set("mode region")
         # Prompt user to place point region on star
         d.set("region shape point")
@@ -89,6 +92,8 @@ class PSF():
             print("\ngalfit run done, loading into DS9...")
             # Load model into ds9
             d.set("mecube new "+output_fits)
+            d.set("tile no")
+            d.set("cmap 1 0.5")
             d.set("scale mode minmax")
             d.set("mode none")
             d.set("zoom to fit")
@@ -110,7 +115,7 @@ class PSF():
                 self.model_file = output_model
 
         else:
-            print('\nGalfit crashed! Please try again')
+            print('\nGalfit crashed! Please try again\n')
 
     def visualize(self, d) -> None:
         '''
@@ -124,9 +129,11 @@ class PSF():
         Returns: nothing
         '''
         if self.config_output_file is None and self.model_file is None:
-            print('\nPlease upload or create psf model first')
+            print('\nPlease upload or create psf model first\n')
         elif self.config_output_file is not None:
             d.set("mecube new "+ self.config_output_file)
+            d.set("tile no")
+            d.set("cmap 1 0.5")
             d.set("scale mode minmax")
             d.set("mode none")
             d.set("zoom to fit")
@@ -205,6 +212,7 @@ class PSF():
             hdulist = fits.open(self.config_output_file)
             galfitheader = hdulist[2].header
             galfit_flags = galfitheader["FLAGS"].split()
+            print()
             for flag in galfit_flags:
                 print("-",flag_dict[flag])
             print()
