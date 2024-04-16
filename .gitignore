@@ -3,3 +3,6 @@ fit.log
 .DS_Store
 galfit.*
 path_config.txt
+build/
+dist/
+galfit_wrapper.spec

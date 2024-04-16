@@ -398,7 +398,7 @@ class Sersic():
             output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
             # Write new galfit config (to update filenames in the uploaded)
             if self.constraint_file is None:
-                constraint = None
+                constraint = 'none'
             else:
                 constraint = self.constraint_file
             input_to_galfit(self.target_file, False, regions, self.zero_point,
