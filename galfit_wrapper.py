@@ -20,6 +20,8 @@ def take_action(action: str) -> None:
     Returns: Nothing
     '''
     actions = {'help': help,
+               '?': help,
+               'h': help,
                'target visualize': visualize_target,
                'change zero point': edit_zero_point,
                'psf create': psf_write_config,
@@ -294,7 +296,7 @@ if __name__ == '__main__':
             if action in ds9_commands:
                 ds9_open = True
                 d = pyds9.DS9()
-        if action == ('quit'):
+        if action == ('quit') or action == ('exit'):
             software_open = False
             if ds9_open:
                 d.set('exit')
