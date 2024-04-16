@@ -200,7 +200,7 @@ class PSF():
                     }
 
         if self.config_output_file is None:
-            print("\nPlease upload or create psf model first")
+            print("\nPlease upload or create psf model first\n")
         else:
             hdulist = fits.open(self.config_output_file)
             galfitheader = hdulist[2].header
