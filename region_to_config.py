@@ -11,8 +11,6 @@ import sep
 def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
                     mask_file, psf_file, pre_box, pre_mags, pre_psf_mags,
                     sky_info, constraint_file):
-  
-    #mask_file = 'none'
     # creates lines for sky component
     def create_sky_component(component_number, fits_data, sky_info):
         if sky_info[3] == 0:
@@ -25,22 +23,26 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
             "0) sky",
             f"1) {sky_level} 1",
             f"2) {sky_info[0]} {sky_info[2]}",
-            f"3) {sky_info[1]} {sky_info[2]}"
+            f"3) {sky_info[1]} {sky_info[2]}",
+            "Z) 0",
             "\n"
         ]
         return '\n'.join(component_lines)
+
     # creates lines for psf component
-    def create_psf_component(component_number, x, y, magnitude):
+    def create_psf_component(component_number, x, y, magnitude, skip):
         component_lines = [
             f"# Component number: {component_number}", 
             "0) psf", 
             f"1) {x} {y} 1 1", 
             f"3) {magnitude} 1",
+            f"Z) {skip}",
             "\n"
         ]
         return '\n'.join(component_lines)
+    
     # creates lines for moffat component
-    def create_moffat_component(compenent_number, x, y, a, b, angle, magnitude):
+    def create_moffat_component(compenent_number, x, y, a, b, angle, magnitude, skip):
         component_lines = [
             f"# Component number: {component_number}",
             "0) moffat",
@@ -50,11 +52,13 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
             "5) 3 1",
             f"9) {b/a} 1",
             f"10) {(angle + 90) % 360} 1",
+            f"Z) {skip}",
             "\n"
         ]
         return "\n".join(component_lines)
+    
     # creates lines for sersic component
-    def create_sersic_component(component_number, x, y, a, b, angle, magnitude):
+    def create_sersic_component(component_number, x, y, a, b, angle, magnitude, skip):
         component_lines = [ 
             f"# Component number: {component_number}",
             "0) sersic",
@@ -64,6 +68,7 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
             "5) 2 1",
             f"9) {b/a} 1",
             f"10) {(angle + 90) % 360} 1",
+            f"Z) {skip}",
             "\n"
         ]
         return "\n".join(component_lines)
@@ -73,10 +78,8 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
     # define names of files, then create lines
     sigma_file = 'none'
     psfSampling = 1
-    #mask_file = 'mask.fits'
 
     file_lines = [
-        #f"A) {fits_file[fits_file.rfind('/')+1:]}",
         f"A) {fits_file}",
         f"B) {output_fits}",
         f"C) {sigma_file}",
@@ -128,7 +131,7 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
         points = 0
         # Loop once to get box params
         for region in regions:
-            if region.name == 'box':
+            if region.name == 'box' and region.__dict__["exclude"] == False:
                 # calculate box for psf and ps, and create lines for file
                 cx, cy, x, y, _ = region.coord_list
                 xmin,xmax,ymin,ymax = int(np.round(cx-x/2)),int(np.round(cx+x/2)),int(np.round(cy-y/2)),int(np.round(cy+y/2))
@@ -148,6 +151,11 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
                 points = -1
                 # get x,y of point
                 x,y = region.coord_list
+                # exclude in final model image?
+                if "background" in region.__dict__["attr"][0]:
+                    skip = 1
+                else:
+                    skip = 0
                 # source extraction with sigma=5
                 try:
                     sep_data = fits_data.astype(np.float64)
@@ -164,10 +172,10 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
                     small_regions_mask_mag = dist_from_center <= a
                     sum_pixels = (np.sum(fits_data*small_regions_mask_mag.astype(int))) * 2
                     magnitude = (-2.5 * np.log10(sum_pixels)) + zpt
-                    component_regions.append(create_moffat_component(component_number, crx, cry, a, a, 0, magnitude))
+                    component_regions.append(create_moffat_component(component_number, crx, cry, a, a, 0, magnitude, skip))
                 except:
                     # if source extractor fails, then estimate magnitude at zeropoint-10 with radius (1 arcsec)*(pixels/arcsecond)
-                    component_regions.append(create_moffat_component(component_number, x, y, 1/ps_x, 1/ps_y, 0, zpt-10))
+                    component_regions.append(create_moffat_component(component_number, x, y, 1/ps_x, 1/ps_y, 0, zpt-10, skip))
                 
                 component_number += 1
             elif region.__dict__["exclude"]:
@@ -198,15 +206,23 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
                 ]
             elif region.name == 'point':
                 x, y = region.coord_list
+                if "background" in region.__dict__["attr"][0]:
+                    skip = 1
+                else:
+                    skip = 0
                 if pre_psf_mags and (psf_count+1) <= len(pre_psf_mags):
                     magnitude = pre_psf_mags[psf_count]
                     psf_count += 1
                 else:
                     magnitude = zpt - 10
-                component_regions.append(create_psf_component(component_number, x, y, magnitude))
+                component_regions.append(create_psf_component(component_number, x, y, magnitude, skip))
                 component_number += 1
             elif region.name == 'ellipse':
                 x, y, a, b, angle = region.coord_list
+                if "background" in region.__dict__["attr"][0]:
+                    skip = 1
+                else:
+                    skip = 0
                 if b > a:
                     if angle >= 270:
                         angle -= 90
@@ -225,15 +241,19 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
                     sersic_count += 1
                 else:
                     magnitude = (-2.5 * math.log10(sum_pixels)) + zeropoint
-                component_regions.append(create_sersic_component(component_number, x, y, a, b, angle, magnitude))
+                component_regions.append(create_sersic_component(component_number, x, y, a, b, angle, magnitude, skip))
                 component_number += 1 
             elif region.name == 'circle':
                 x, y, r = region.coord_list
+                if "background" in region.__dict__["attr"][0]:
+                    skip = 1
+                else:
+                    skip = 0
                 small_regions_mask_mag = pyregion.get_mask([region], fits_data).astype(int)
                 sum_pixels = (np.sum(fits_data * small_regions_mask_mag)) * 2
                 zeropoint = zpt
                 magnitude = (-2.5 * math.log10(sum_pixels)) + zeropoint
-                component_regions.append(create_moffat_component(component_number, x, y, r, r, 0, magnitude))
+                component_regions.append(create_moffat_component(component_number, x, y, r, r, 0, magnitude, skip))
                 component_number += 1
             else:
                 print(region,"will be ignored")
