@@ -3,6 +3,7 @@
 
 import os
 import sys
+import time
 import shutil
 import pyds9
 from astropy.io import fits
@@ -125,6 +126,14 @@ def list_target():
     '''
     Checks progress in the given directory
     '''
+    def get_time(file_name):
+        '''
+        Given a file path, returns the last modified date/time in nice format
+        '''
+        time_obj = time.strptime(time.ctime(os.path.getmtime(os.path.join(path_to_output,file_name))))
+
+        return str(time.strftime("%Y-%m-%d %H:%M:%S", time_obj))
+
     files = os.listdir(path_to_output)
     file_,psfc_,psf_,c_,m_ = False,False,False,False,False
     for file in files:
@@ -140,15 +149,19 @@ def list_target():
             m_ = True
     print("\nCurrently Saved:")
     if file_:
-        print(f'- {target_filename + ".fits"}: original file')
+        print('- '+get_time(target_filename+".fits")+'\t'+(target_filename+".fits")+'             '+'original file')
     if psfc_:
-        print(f'- {target_filename + "_psf_config.txt"}: psf config')
+        # print(f'- {target_filename + "_psf_config.txt"}: psf config')
+        print('- '+get_time(target_filename + "_psf_config.txt")+'\t'+(target_filename + "_psf_config.txt")+'   '+'psf config')
     if psfc_:
-        print(f'- {target_filename + "_psf.fits"}: psf model FITS')
+        # print(f'- {target_filename + "_psf.fits"}: psf model FITS')
+        print('- '+get_time(target_filename + "_psf.fits")+'\t'+(target_filename + "_psf.fits")+'         '+'psf model FITS')
     if psfc_:
-        print(f'- {target_filename + "_config.txt"}: model config')
+        # print(f'- {target_filename + "_config.txt"}: model config')
+        print('- '+get_time(target_filename + "_config.txt")+'\t'+(target_filename + "_config.txt")+'       '+'model config')
     if psfc_:
-        print(f'- {target_filename + "_model.fits"}: multi-band model FITS')
+        # print(f'- {target_filename + "_model.fits"}: multi-band model FITS')
+        print('- '+get_time(target_filename + "_model.fits")+'\t'+(target_filename + "_model.fits")+'       '+'multi-band model FITS')
     print()
     
 def visualize_target():
