@@ -151,16 +151,12 @@ def list_target():
     if file_:
         print('- '+get_time(target_filename+".fits")+'\t'+(target_filename+".fits")+'             '+'original file')
     if psfc_:
-        # print(f'- {target_filename + "_psf_config.txt"}: psf config')
         print('- '+get_time(target_filename + "_psf_config.txt")+'\t'+(target_filename + "_psf_config.txt")+'   '+'psf config')
-    if psfc_:
-        # print(f'- {target_filename + "_psf.fits"}: psf model FITS')
+    if psf_:
         print('- '+get_time(target_filename + "_psf.fits")+'\t'+(target_filename + "_psf.fits")+'         '+'psf model FITS')
-    if psfc_:
-        # print(f'- {target_filename + "_config.txt"}: model config')
+    if c_:
         print('- '+get_time(target_filename + "_config.txt")+'\t'+(target_filename + "_config.txt")+'       '+'model config')
-    if psfc_:
-        # print(f'- {target_filename + "_model.fits"}: multi-band model FITS')
+    if m_:
         print('- '+get_time(target_filename + "_model.fits")+'\t'+(target_filename + "_model.fits")+'       '+'multi-band model FITS')
     print()
     
