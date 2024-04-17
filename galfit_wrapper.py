@@ -267,7 +267,7 @@ def sersic_visualize_rgb():
     Visualize the target rgb vs the model rgb, taking 3 bands as inputs
     '''
     if not os.path.exists(path_to_output + 'rgb_info.txt'):
-        ("\nRun target visualize rgb first to get correct scaling\n")
+        print("\nRun target visualize rgb first to get correct scaling\n")
     elif len(open(path_to_output + 'rgb_info.txt', 'r').read().splitlines()) != 9:
         print("\nUpload 3 multi-band model files (*_model.fits) in red, green, blue order\n")
         r_file = my_filebrowser()
