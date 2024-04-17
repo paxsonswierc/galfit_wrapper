@@ -61,9 +61,9 @@ class PSF():
         d.set("scale mode 99.5")
         d.set("zoom to fit")
         d.set("mode region")
-        # Prompt user to place point region on star
-        d.set("region shape point")
-        input('\nPlace point for star. Hit enter when region is placed')
+        # Prompt user to place circle region on star
+        d.set("region shape circle")
+        input('\nPlace circle for star. Hit enter when region is placed')
         # Prompt user to place box region for area to run model
         d.set("region shape box")
         input('\nPlace box for frame. Hit enter when region is placed')

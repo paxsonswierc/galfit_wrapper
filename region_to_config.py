@@ -5,7 +5,6 @@ import pyregion
 from astropy.io import fits
 import numpy as np
 import math
-import sep
 
 # function for fits file and regions -> galfit file, for both psf and normal galfit
 def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
@@ -125,138 +124,78 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
     component_regions.append(create_sky_component(component_number, fits_data, sky_info))
     component_number += 1
 
-    # if psf, then use point region and source extractor (sep) to find best center and box region
-    # if not psf, do galfit regions as normal (exclude=mask,point=psf,circle=moffat,ellipse=sersic)
-    if psf:
-        points = 0
-        # Loop once to get box params
-        for region in regions:
-            if region.name == 'box' and region.__dict__["exclude"] == False:
-                # calculate box for psf and ps, and create lines for file
-                cx, cy, x, y, _ = region.coord_list
-                xmin,xmax,ymin,ymax = int(np.round(cx-x/2)),int(np.round(cx+x/2)),int(np.round(cy-y/2)),int(np.round(cy+y/2))
-                ps_x,ps_y = 3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5,3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5
-                info_lines = [
-                    f"H) {xmin} {xmax} {ymin} {ymax}",
-                    f"I) {xmax-xmin+1} {ymax-ymin+1}",
-                    f"J) {zpt}",
-                    f"K) {ps_x} {ps_y}",
-                    "O) regular",
-                    "P) 0",
-                    "\n"
-                ]
-        # Loop again to get rest of info
-        for region in regions:
-            if region.name == "point":
-                points = -1
-                # get x,y of point
-                x,y = region.coord_list
-                # exclude in final model image?
-                if "background" in region.__dict__["attr"][0]:
-                    skip = 1
-                else:
-                    skip = 0
-                # source extraction with sigma=5
-                try:
-                    sep_data = fits_data.astype(np.float64)
-                    bkg = sep.Background(sep_data)
-                    objects = sep.extract(sep_data-bkg, 1.5)
-                    # find source closest to point region source, get its center and (major axis) radius
-                    xs,ys = objects["x"],objects["y"]
-                    minxy = np.argmin(np.sqrt((xs-x)**2+(ys-y)**2))
-                    crx,cry,a = objects["x"][minxy],objects["y"][minxy],objects["a"][minxy]
-                    crx,cry = crx+1,cry+1
-                    # calculate magnitude of the star
-                    Y, X = np.ogrid[:len(fits_data),:len(fits_data[0])]
-                    dist_from_center = np.sqrt((X-crx)**2 + (Y-cry)**2)
-                    small_regions_mask_mag = dist_from_center <= a
-                    sum_pixels = (np.sum(fits_data*small_regions_mask_mag.astype(int))) * 2
-                    magnitude = (-2.5 * np.log10(sum_pixels)) + zpt
-                    component_regions.append(create_moffat_component(component_number, crx, cry, a, a, 0, magnitude, skip))
-                except:
-                    # if source extractor fails, then estimate magnitude at zeropoint-10 with radius (1 arcsec)*(pixels/arcsecond)
-                    component_regions.append(create_moffat_component(component_number, x, y, 1/ps_x, 1/ps_y, 0, zpt-10, skip))
-                
-                component_number += 1
-            elif region.__dict__["exclude"]:
-                region.__dict__["exclude"] = False
-                excluded_regions_mask += pyregion.get_mask([region], fits_data).astype(int)
-
-        if points == 0:
-            print("\nmust provide at least one point region for PSF!\n")
-    else:
-        sersic_count = 0
-        psf_count = 0
-        for region in regions:
-            if region.__dict__['exclude']:
-                region.__dict__['exclude'] = False
-                excluded_regions_mask += pyregion.get_mask([region], fits_data).astype(int)
-            elif region.name == 'box':
-                cx, cy, x, y, _ = region.coord_list
-                xmin,xmax,ymin,ymax = int(np.round(cx-x/2)),int(np.round(cx+x/2)),int(np.round(cy-y/2)),int(np.round(cy+y/2))
-                ps_x,ps_y = 3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5,3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5
-                info_lines = [
-                    f"H) {xmin} {xmax} {ymin} {ymax}",
-                    f"I) {xmax-xmin+1} {ymax-ymin+1}",
-                    f"J) {zpt}",
-                    f"K) {ps_x} {ps_y}",
-                    "O) regular",
-                    "P) 0",
-                    "\n"
-                ]
-            elif region.name == 'point':
-                x, y = region.coord_list
-                if "background" in region.__dict__["attr"][0]:
-                    skip = 1
-                else:
-                    skip = 0
-                if pre_psf_mags and (psf_count+1) <= len(pre_psf_mags):
-                    magnitude = pre_psf_mags[psf_count]
-                    psf_count += 1
-                else:
-                    magnitude = zpt - 10
-                component_regions.append(create_psf_component(component_number, x, y, magnitude, skip))
-                component_number += 1
-            elif region.name == 'ellipse':
-                x, y, a, b, angle = region.coord_list
-                if "background" in region.__dict__["attr"][0]:
-                    skip = 1
-                else:
-                    skip = 0
-                if b > a:
-                    if angle >= 270:
-                        angle -= 90
-                    else:
-                        angle += 90
-                    a,b = b,a
-                if b == 0:
-                    b = 1
-                if a == 0:
-                    a = 1
-                small_regions_mask_mag = pyregion.get_mask([region], fits_data).astype(int)
-                sum_pixels = (np.sum(fits_data * small_regions_mask_mag)) * 2
-                zeropoint = zpt
-                if pre_mags and (sersic_count+1) <= len(pre_mags):
-                    magnitude = pre_mags[sersic_count]
-                    sersic_count += 1
-                else:
-                    magnitude = (-2.5 * math.log10(sum_pixels)) + zeropoint
-                component_regions.append(create_sersic_component(component_number, x, y, a, b, angle, magnitude, skip))
-                component_number += 1 
-            elif region.name == 'circle':
-                x, y, r = region.coord_list
-                if "background" in region.__dict__["attr"][0]:
-                    skip = 1
-                else:
-                    skip = 0
-                small_regions_mask_mag = pyregion.get_mask([region], fits_data).astype(int)
-                sum_pixels = (np.sum(fits_data * small_regions_mask_mag)) * 2
-                zeropoint = zpt
-                magnitude = (-2.5 * math.log10(sum_pixels)) + zeropoint
-                component_regions.append(create_moffat_component(component_number, x, y, r, r, 0, magnitude, skip))
-                component_number += 1
+    sersic_count = 0
+    psf_count = 0
+    for region in regions:
+        if region.__dict__['exclude']:
+            region.__dict__['exclude'] = False
+            excluded_regions_mask += pyregion.get_mask([region], fits_data).astype(int)
+        elif region.name == 'box':
+            cx, cy, x, y, _ = region.coord_list
+            xmin,xmax,ymin,ymax = int(np.round(cx-x/2)),int(np.round(cx+x/2)),int(np.round(cy-y/2)),int(np.round(cy+y/2))
+            ps_x,ps_y = 3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5,3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5
+            info_lines = [
+                f"H) {xmin} {xmax} {ymin} {ymax}",
+                f"I) {xmax-xmin+1} {ymax-ymin+1}",
+                f"J) {zpt}",
+                f"K) {ps_x} {ps_y}",
+                "O) regular",
+                "P) 0",
+                "\n"
+            ]
+        elif region.name == 'point':
+            x, y = region.coord_list
+            if "background" in region.__dict__["attr"][0]:
+                skip = 1
             else:
-                print(region,"will be ignored")
+                skip = 0
+            if pre_psf_mags and (psf_count+1) <= len(pre_psf_mags):
+                magnitude = pre_psf_mags[psf_count]
+                psf_count += 1
+            else:
+                magnitude = zpt - 10
+            component_regions.append(create_psf_component(component_number, x, y, magnitude, skip))
+            component_number += 1
+        elif region.name == 'ellipse':
+            x, y, a, b, angle = region.coord_list
+            if "background" in region.__dict__["attr"][0]:
+                skip = 1
+            else:
+                skip = 0
+            if b > a:
+                if angle >= 270:
+                    angle -= 90
+                else:
+                    angle += 90
+                a,b = b,a
+            if b == 0:
+                b = 1
+            if a == 0:
+                a = 1
+            small_regions_mask_mag = pyregion.get_mask([region], fits_data).astype(int)
+            sum_pixels = (np.sum(fits_data * small_regions_mask_mag)) * 2
+            zeropoint = zpt
+            if pre_mags and (sersic_count+1) <= len(pre_mags):
+                magnitude = pre_mags[sersic_count]
+                sersic_count += 1
+            else:
+                magnitude = (-2.5 * math.log10(sum_pixels)) + zeropoint
+            component_regions.append(create_sersic_component(component_number, x, y, a, b, angle, magnitude, skip))
+            component_number += 1 
+        elif region.name == 'circle':
+            x, y, r = region.coord_list
+            if "background" in region.__dict__["attr"][0]:
+                skip = 1
+            else:
+                skip = 0
+            small_regions_mask_mag = pyregion.get_mask([region], fits_data).astype(int)
+            sum_pixels = (np.sum(fits_data * small_regions_mask_mag)) * 2
+            zeropoint = zpt
+            magnitude = (-2.5 * math.log10(sum_pixels)) + zeropoint
+            component_regions.append(create_moffat_component(component_number, x, y, r, r, 0, magnitude, skip))
+            component_number += 1
+        else:
+            print(region,"will be ignored")
 
     # create mask and mask file
     excluded_regions_mask = np.ma.masked_greater(excluded_regions_mask,0).filled(1)
