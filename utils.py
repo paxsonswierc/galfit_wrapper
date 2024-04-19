@@ -13,11 +13,6 @@ def write_path_config() -> None:
     path_to_galfit = input('Path to your galfit executable? > ')
     path_to_galfit = os.path.abspath(path_to_galfit)
 
-    #path_to_output = input('Folder you would like to save outputs > ')
-    # if not os.path.exists(path_to_output):
-    #     os.makedirs(path_to_output)
-    # path_to_output = os.path.abspath(path_to_output)
-
     paths_file = open('path_config.txt', 'w')
     paths_file.write(path_to_galfit) #+ '\n' + path_to_output)
     paths_file.close()
