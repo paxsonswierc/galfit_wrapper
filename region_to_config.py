@@ -72,6 +72,13 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
         ]
         return "\n".join(component_lines)
     
+    # calculate the arcsec/pixel from the CD matrix in the header
+    def calc_asecpx(header):
+        try:
+            return 3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5,3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5
+        except:
+            return 3600*abs(header["CD1_1"]*header["CD2_2"])**0.5,3600*abs(header["CD1_1"]*header["CD2_2"])**0.5
+
 
 
     # define names of files, then create lines
@@ -97,7 +104,7 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
     header = hdulist_fits[0].header
     hdulist_fits.close()
 
-    ps_x,ps_y = 3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5,3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5
+    ps_x,ps_y = calc_asecpx(header)
     if pre_box:
         info_lines = [
             f"H) {pre_box[0]} {pre_box[1]} {pre_box[2]} {pre_box[3]}",
@@ -133,7 +140,7 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
         elif region.name == 'box':
             cx, cy, x, y, _ = region.coord_list
             xmin,xmax,ymin,ymax = int(np.round(cx-x/2)),int(np.round(cx+x/2)),int(np.round(cy-y/2)),int(np.round(cy+y/2))
-            ps_x,ps_y = 3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5,3600*abs(header["CD1_1"]*header["CD2_2"]-header["CD1_2"]*header["CD2_1"])**0.5
+            ps_x,ps_y = calc_asecpx(header)
             info_lines = [
                 f"H) {xmin} {xmax} {ymin} {ymax}",
                 f"I) {xmax-xmin+1} {ymax-ymin+1}",
