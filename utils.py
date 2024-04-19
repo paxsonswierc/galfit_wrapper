@@ -1,7 +1,7 @@
 # Util functions for galfit wrapper
 # Author: Paxson Swierc
 
-from tkinter.filedialog import askopenfilename, askdirectory 
+from tkinter.filedialog import askopenfilename 
 from tkinter import Tk
 import os
 
@@ -14,7 +14,7 @@ def write_path_config() -> None:
     path_to_galfit = os.path.abspath(path_to_galfit)
 
     paths_file = open('path_config.txt', 'w')
-    paths_file.write(path_to_galfit) #+ '\n' + path_to_output)
+    paths_file.write(path_to_galfit)
     paths_file.close()
 
 def get_paths() -> tuple[str, str, str]:
@@ -32,8 +32,7 @@ def get_paths() -> tuple[str, str, str]:
         paths_file = open('path_config.txt')
         paths = paths_file.readlines()
 
-    path_to_galfit = paths[0]#[:-1]
-    #path_to_output = paths[1]
+    path_to_galfit = paths[0]
     path_to_output = os.path.expanduser('~/gf_out/')
     if not os.path.exists(path_to_output):
         os.makedirs(path_to_output)
