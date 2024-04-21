@@ -462,9 +462,16 @@ class Sersic():
         config = open(self.config_file, 'r')
         lines = config.readlines()
 
+        # create temporary region file to write region files out to
+        reg_f = open(self.ouput_dir + "temp_reg.reg", "w")
+
         for i, line in enumerate(lines):
             # Check for sersic component
             if 'sersic' in line and 'sersic,' not in line:
+                if "# Component number:" in lines[i-1]:
+                    number = lines[i-1].split()[3]
+                else:
+                    number = ""
                 for component_line in lines[i+1:]:
                     words = component_line.split()
                     if '1)' in component_line:
@@ -490,10 +497,15 @@ class Sersic():
                             angle += 90
                     if '0)' in component_line or component_line == lines[-1]:
                         # Set ellipse region
-                        d.set(f'region command "ellipse {x} {y} {a} {b} {angle}"')
+                        reg_f.write(f"ellipse {x} {y} {a} {b} {angle} # text={{{number}}} color=#f82")
+                        reg_f.write("\n")
                         break
             # Check for psf component
             if '0) psf' in line:
+                if "# Component number:" in lines[i-1]:
+                    number = lines[i-1].split()[3]
+                else:
+                    number = ""
                 for component_line in lines[i+1:]:
                     words = component_line.split()
                     if '1)' in component_line:
@@ -505,7 +517,8 @@ class Sersic():
                         psf_magnitudes.append(float(words[1]))
                     if '0)' in component_line or component_line == lines[-1]:
                         # Set region
-                        d.set(f'region command "point {x} {y}"')
+                        reg_f.write(f"point {x} {y} # text={{{number}}} color=#93f")
+                        reg_f.write("\n")
                         break
             if '0) sky' in line:
                 for component_line in lines[i+1:]:
@@ -533,6 +546,11 @@ class Sersic():
                 # Save box information
                 x_center = int(words[1])
                 y_center = int(words[2])
+
+        # open regions, then delete temporary region file
+        reg_f.close()
+        d.set("region "+self.ouput_dir+"temp_reg.reg")
+        os.remove(self.ouput_dir+"temp_reg.reg") 
 
         config.close()
         return [x_min, x_max, y_min, y_max, x_center, y_center],\
