@@ -347,7 +347,7 @@ if __name__ == '__main__':
         print("\nPlease choose .fits type target file\n")
         target_path = my_filebrowser()
     if target_path[-5:] != '.fits':
-        print('\nError: please upload .fits type target file\n')
+        print('Error: please upload .fits type target file\n')
         quit()
     # Make path to directory for target
     target_filename = os.path.basename(target_path)[:-5]
