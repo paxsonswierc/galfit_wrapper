@@ -1,8 +1,10 @@
 # Util functions for galfit wrapper
 # Author: Paxson Swierc
 
+import tkinter as tk
 from tkinter.filedialog import askopenfilename 
 from tkinter import Tk
+from tkinter import filedialog
 import os
 
 def write_path_config() -> None:
@@ -52,3 +54,33 @@ def my_filebrowser():
     root.withdraw()
     filename = askopenfilename()
     return filename
+
+def open_textfile(path_to_file):
+    '''
+    Opens GUI text editor
+    '''
+    # saves file (overwrites) then quits window
+    def save_file():
+        with open(path_to_file, "w") as file:
+            file.write(text_widget.get("1.0", tk.END))
+        root.destroy()
+
+    # initializes GUI
+    root = Tk()
+    root.title("Text Editor")
+
+    # prepares GUI for input of text file
+    text_widget = tk.Text(root, wrap=tk.WORD)
+    text_widget.pack(fill=tk.BOTH, expand=True)
+
+    # opens given file in GUI
+    with open(path_to_file, "r") as file:
+        text_widget.delete(1.0,tk.END)
+        text_widget.insert(tk.END,file.read())
+
+    # adds a button to save file after edits
+    save_button = tk.Button(root, text="Save", command=save_file)
+    save_button.pack(side=tk.LEFT,padx=5,pady=5)
+
+    # starts the tkinter loop (ends once file is saved)
+    root.mainloop()

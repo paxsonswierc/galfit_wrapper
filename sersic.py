@@ -4,6 +4,7 @@
 from astropy.io import fits
 import os
 from region_to_config import input_to_galfit
+from utils import open_textfile
 import subprocess
 import shutil
 
@@ -124,7 +125,9 @@ class Sersic():
             d.set("zoom to fit")
             d.set("mode region")
             # Ask for manual edits first
-            input(f'\nPlease make any manual edits to config text file located at {self.config_file} first. Hit enter to continue')
+            print(f'\nPlease make any edits to opened config text file ({self.config_file}). Click "save" when done.')
+            open_textfile(self.config_file)
+
             # Load in regions
             box, mags, psf_mags, sky_info = self.config_to_region(d)
             d.set("region shape ellipse")
