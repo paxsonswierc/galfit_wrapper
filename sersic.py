@@ -125,8 +125,9 @@ class Sersic():
             d.set("zoom to fit")
             d.set("mode region")
             # Ask for manual edits first
-            print(f'\nPlease make any edits to opened config text file ({self.config_file}). Click "save" when done.')
-            open_textfile(self.config_file)
+            open_editor = ('Would you like to edit the config text file manually? Type yes or hit enter to skip >')
+            if open_editor == 'yes' or open_editor == 'y':
+                open_textfile(self.config_file)
 
             # Load in regions
             box, mags, psf_mags, sky_info = self.config_to_region(d)

@@ -63,7 +63,7 @@ def open_textfile(path_to_file):
     def save_file():
         with open(path_to_file, "w") as file:
             file.write(text_widget.get("1.0", tk.END))
-        root.destroy()
+        root.after(1, root.destroy())
 
     # initializes GUI
     root = Tk()
