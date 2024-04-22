@@ -125,7 +125,7 @@ class Sersic():
             d.set("zoom to fit")
             d.set("mode region")
             # Ask for manual edits first
-            open_editor = input('Would you like to edit the config text file manually? Type yes or hit enter to skip >')
+            open_editor = input('\nWould you like to edit the config text file manually? Type yes or hit enter to skip > ')
             if open_editor == 'yes' or open_editor == 'y':
                 open_textfile(self.config_file)
 
