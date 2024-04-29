@@ -66,6 +66,9 @@ def take_action(action: str) -> None:
                'sersic visualize': sersic_visualize,
                'sersic v': sersic_visualize,
                'sv': sersic_visualize,
+               'sersic visualize regions': sersic_visualize_regions,
+               'svr': sersic_visualize_regions,
+               'sv r': sersic_visualize_regions,
                'sersic visualize rgb': sersic_visualize_rgb,
                'sersic v rgb': sersic_visualize_rgb,
                'sv rgb': sersic_visualize_rgb,
@@ -112,6 +115,7 @@ def help():
     sersic remove constraint
     sersic optimize config
     sersic visualize
+    sersic visualize regions
     sersic visualize rgb
     sersic flags
     sersic upload config
@@ -262,6 +266,12 @@ def sersic_visualize():
     '''
     sersic.visualize(d)
 
+def sersic_visualize_regions():
+    '''
+    Visualize regions
+    '''
+    sersic.visualize_regions(d)
+
 def sersic_visualize_rgb():
     '''
     Visualize the target rgb vs the model rgb, taking 3 bands as inputs
@@ -330,6 +340,7 @@ if __name__ == '__main__':
                     'sersic edit config', 'sersic ec', 'sec',
                     'sersic optimize config', 'sersic oc', 'soc',
                     'sersic visualize', 'sersic v', 'sv',
+                    'sersic visualize regions', 'svr', 'sv r',
                     'sersic visualize rgb', 'sersic v rgb', 'sv rgb',
                     'sersic upload config', 'sersic uc', 'suc']
     # Reads in paths from local config file. If none, prompts user for them

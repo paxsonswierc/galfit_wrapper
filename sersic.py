@@ -124,13 +124,14 @@ class Sersic():
             d.set("scale mode 99.5")
             d.set("zoom to fit")
             d.set("mode region")
+            box, mags, psf_mags, sky_info = self.config_to_region(d)
             # Ask for manual edits first
             open_editor = input('\nWould you like to edit the config text file manually? Type yes or hit enter to skip > ')
             if open_editor == 'yes' or open_editor == 'y':
                 open_textfile(self.config_file)
+                # Load in regions
+                box, mags, psf_mags, sky_info = self.config_to_region(d)
 
-            # Load in regions
-            box, mags, psf_mags, sky_info = self.config_to_region(d)
             d.set("region shape ellipse")
             # Constrained changes
             input('\nMake changes to existing regions and add any new regions you may want to constrain. Hit enter to continue')
@@ -247,6 +248,27 @@ class Sersic():
             d.set("mode none")
             d.set("zoom to fit")
             d.set("cube play")
+
+    def visualize_regions(self, d) -> None:
+        '''
+        Visualizes regions of model using ds9
+
+        Args: 
+            d: pyds9 DS9 instance
+
+        Returns: Nothing
+        '''
+        if self.config_file is None:
+            print('\nPlease create or upload config file first\n')
+        else:
+            # Open target in ds9
+            d.set("fits new "+self.target_file)
+            d.set("tile no")
+            d.set("cmap 1 0.5")
+            d.set("scale mode 99.5")
+            d.set("zoom to fit")
+            d.set("mode pan")
+            box, mags, psf_mags, sky_info = self.config_to_region(d)
 
     def visualize_rgb(self, rfile: str, gfile: str, bfile: str, single: bool, d) -> None:
         '''
