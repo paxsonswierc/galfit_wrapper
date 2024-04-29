@@ -77,6 +77,7 @@ class PSF():
         input_to_galfit(self.target_file, True, psf_regions, self.zero_point,
                         output_config, output_fits, output_mask, 'none',
                         False, False, False, [0]*4, 'none')
+        self.config_file = output_config
         # Delete old regions
         d.set('region select all')
         d.set('region delete select')
