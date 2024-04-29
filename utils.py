@@ -1,5 +1,5 @@
 # Util functions for galfit wrapper
-# Author: Paxson Swierc
+# Authors: Paxson Swierc & Daniel Babnigg
 
 import tkinter as tk
 from tkinter.filedialog import askopenfilename 
