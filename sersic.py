@@ -7,6 +7,7 @@ from region_to_config import input_to_galfit
 from utils import open_textfile
 import subprocess
 import shutil
+import pyregion
 
 class Sersic():
     '''
@@ -29,6 +30,7 @@ class Sersic():
         create_config: creates galfit config file with ds9 
         edit_config: allows editing of current config with ds9
         optimize_config: runs galfit for current config file
+        produce_config: runs galfit for current config file with -o2 after region property edits
         visualize: opens up sersic model in ds9
         visualize_rgb: opens up target and model rgb images in ds9
         upload_config: copies uploaded config to dir and loads it to instance
@@ -136,11 +138,14 @@ class Sersic():
             # Constrained changes
             input('\nMake changes to existing regions and add any new regions you may want to constrain. Hit enter to continue')
             # Add constraint based on input
-            add_constraint = input('\nAdd constraint? Hit enter for yes, type no otherwise > ')
+            add_constraint = input('\nAdd/use existing constraint? Hit enter for yes, type no otherwise > ')
             if add_constraint == 'no':
                 self.remove_constraint()
             else:
-                self.add_constraint()
+                if os.path.exists(self.constraint_file):
+                    use_exist_cst = input('\nUse existing constraint file? Hit enter for yes, type no to create new constaint file > ')
+                    if use_exist_cst == 'no':
+                        self.add_constraint()
             # Give option to add new regions
             input('\nAdd any new regions do NOT want to constrain. Hit enter to continue')
             # Get regions
@@ -204,8 +209,12 @@ class Sersic():
                 next_step = input(prompt)
                 if next_step == '1':
                     # Save the model and config
-                    output_fits_final = self.ouput_dir + self.target_filename + '_model.fits'
+                    # Replace this config with galfit output config
+                    os.remove(self.config_file)
+                    shutil.copyfile('galfit.01', self.config_file)
                     os.remove('galfit.01')
+                    # save the model
+                    output_fits_final = self.ouput_dir + self.target_filename + '_model.fits'
                     os.rename(output_fits, output_fits_final)
                     self.config_output_file = output_fits_final
 
@@ -228,6 +237,92 @@ class Sersic():
                     print('\nCorrupted output. Check for buffer overflow.\nMay have to do with output directory path or target fits file path being too long\n')
                 else:
                     print('\nGalfit crashed. Please edit/remake config file and try again\n')
+
+    def produce_config(self, d) -> None:
+        '''
+        Produces a galfit model based on config file using -o2 flag; no optimization
+
+        Args:
+            d: pyds9 DS9 instance
+        
+        Returns: Nothing
+        '''
+        if self.config_file is None:
+            print('\nPlease create or upload config file first\n')
+        else:
+            # Open target in ds9
+            d.set("fits new "+self.target_file)
+            d.set("tile no")
+            d.set("cmap 1 0.5")
+            d.set("scale mode 99.5")
+            d.set("zoom to fit")
+            d.set("mode region")
+            _ = self.config_to_region(d)
+            
+            print('\nDO NOT edit/delete/add regions except for chaning source/background properties')
+            input('\nChange regions\' properties to background to not include in model. Hit enter to continue')
+            regions = d.get("region")
+
+            # Establish output files
+            output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
+            
+            regions = pyregion.parse(regions)
+            reg_list = []
+            inc_list = []
+            for region in regions:
+                if "background" in region.__dict__["attr"][0]:
+                    reg_list.append(str(region.__dict__["attr"][1]["text"]))
+                    inc_list.append(1)
+                else:
+                    reg_list.append(str(region.__dict__["attr"][1]["text"]))                    
+                    inc_list.append(0)
+
+            with open(self.config_file, 'r') as config:
+                lines = config.readlines()
+                temp_lines = []
+                in_comp = False
+                for i, line in enumerate(lines):
+                    if 'Component number:' in line and 'sky' not in lines[i+1]:
+                        comp_num = str(int(line.split()[3]))
+                        in_comp = True
+                    if in_comp and 'Z)' in line:
+                        temp_lines.append(f"Z) {inc_list[reg_list.index(comp_num)]}")
+                        in_comp = False
+                    else:
+                        temp_lines.append(line)
+
+            # Write update to config file
+            with open(self.ouput_dir + 'config_temp.txt', 'w') as file:
+                file.writelines(temp_lines)
+
+            # Run galfit
+            subprocess.run(['/bin/bash', '-c', str(self.galfit_path+' '+self.ouput_dir+'config_temp.txt'+' -o2')])
+            os.remove(self.ouput_dir+'config_temp.txt')
+            print('\nFitting finished')
+            # Check if galfit was successful
+            if os.path.exists(output_fits):
+                print("\ngalfit run done, loading into DS9...\n")
+                print("produced mutli-frame fits model saved in "+str(self.ouput_dir + self.target_filename + '_model_prod.fits'))
+                print()
+                # Open output in ds9
+                d.set("mecube new " + output_fits)
+                d.set("tile no")
+                d.set("cmap 1 0.5")
+                d.set("scale mode minmax")
+                d.set("mode none")
+                d.set("zoom to fit")
+                d.set("cube play")
+
+                # Save the model and config
+                output_fits_final = self.ouput_dir + self.target_filename + '_model_prod.fits'
+                os.rename(output_fits, output_fits_final)
+            else:
+                if os.path.exists(output_fits):
+                    print('\nCorrupted output. Check for buffer overflow.\nMay have to do with output directory path or target fits file path being too long\n')
+                else:
+                    print('\nGalfit crashed. Please edit/remake config file and try again\n')
+
+
 
     def visualize(self, d) -> None:
         '''
@@ -628,7 +723,6 @@ class Sersic():
             with open(self.config_file, 'w') as file:
                 file.writelines(lines)
             # creates a text file from list of constraints     
-            constraint_contents = "\n".join(constraint_lines)
             with open(self.constraint_file, 'w') as h:
                 h.write("\n".join(constraint_lines))
 

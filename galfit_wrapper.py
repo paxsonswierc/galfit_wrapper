@@ -63,6 +63,9 @@ def take_action(action: str) -> None:
                'sersic optimize config': sersic_optimize,
                'sersic oc': sersic_optimize,
                'soc': sersic_optimize,
+               'sersic produce config': sersic_produce,
+               'sersic pc': sersic_produce,
+               'spc': sersic_produce,
                'sersic visualize': sersic_visualize,
                'sersic v': sersic_visualize,
                'sv': sersic_visualize,
@@ -114,6 +117,7 @@ def help():
     sersic add constraint
     sersic remove constraint
     sersic optimize config
+    sersic produce config
     sersic visualize
     sersic visualize regions
     sersic visualize rgb
@@ -139,7 +143,7 @@ def list_target():
         return str(time.strftime("%Y-%m-%d %H:%M:%S", time_obj))
 
     files = os.listdir(path_to_output)
-    file_,psfc_,psf_,c_,m_ = False,False,False,False,False
+    file_,psfc_,psf_,c_,cst_,m_ = False,False,False,False,False,False
     for file in files:
         if file == target_filename + ".fits":
             file_ = True
@@ -149,6 +153,8 @@ def list_target():
             psf_ = True
         if file == target_filename + '_config.txt':
             c_ = True
+        if file == target_filename + '_constraint.txt':
+            cst_ = True
         if file == target_filename + '_model.fits':
             m_ = True
     print("\nCurrently Saved:")
@@ -160,6 +166,8 @@ def list_target():
         print('- '+get_time(target_filename + "_psf.fits")+'\t'+(target_filename + "_psf.fits")+'         '+'psf model FITS')
     if c_:
         print('- '+get_time(target_filename + "_config.txt")+'\t'+(target_filename + "_config.txt")+'       '+'model config')
+    if cst_:
+        print('- '+get_time(target_filename + "_constraint.txt")+'\t'+(target_filename + "_constraint.txt")+'   '+'model constraint')
     if m_:
         print('- '+get_time(target_filename + "_model.fits")+'\t'+(target_filename + "_model.fits")+'       '+'multi-band model FITS')
     print()
@@ -260,6 +268,12 @@ def sersic_optimize():
     '''
     sersic.optimize_config(d)
 
+def sersic_produce():
+    '''
+    Run existing model config through galfit with -o2
+    '''
+    sersic.produce_config(d)
+
 def sersic_visualize():
     '''
     Visualize model
@@ -339,6 +353,7 @@ if __name__ == '__main__':
                     'sersic create config', 'sersic cc', 'scc',
                     'sersic edit config', 'sersic ec', 'sec',
                     'sersic optimize config', 'sersic oc', 'soc',
+                    'sersic produce config', 'sersic pc', 'spc',
                     'sersic visualize', 'sersic v', 'sv',
                     'sersic visualize regions', 'svr', 'sv r',
                     'sersic visualize rgb', 'sersic v rgb', 'sv rgb',
