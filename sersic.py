@@ -313,14 +313,6 @@ class Sersic():
                     rgb_info.write(str(gscale)+'\n')
                     rgb_info.write(str(bscale)+'\n')
         else:
-            # creates temporary files from the multi-band model for RGB frames
-            r_t_fits = self.ouput_dir + self.target_filename + '_r_t.fits'
-            g_t_fits = self.ouput_dir + self.target_filename + '_g_t.fits'
-            b_t_fits = self.ouput_dir + self.target_filename + '_b_t.fits'
-            r_m_fits = self.ouput_dir + self.target_filename + '_r_m.fits'
-            g_m_fits = self.ouput_dir + self.target_filename + '_g_m.fits'
-            b_m_fits = self.ouput_dir + self.target_filename + '_b_m.fits'
-
             rscale, gscale, bscale = open(self.ouput_dir + 'rgb_info.txt', 'r').read().splitlines()[3:6]
 
             hdu_r = fits.open(rfile)
@@ -328,13 +320,6 @@ class Sersic():
             hdu_b = fits.open(bfile)
 
             if len(hdu_r) == 4 and len(hdu_g) == 4 and len(hdu_b) == 4:
-                fits.writeto(r_t_fits,data=hdu_r[1].data,header=hdu_r[1].header,overwrite=True)
-                fits.writeto(r_m_fits,data=hdu_r[2].data,header=hdu_r[2].header,overwrite=True)
-                fits.writeto(g_t_fits,data=hdu_g[1].data,header=hdu_g[1].header,overwrite=True)
-                fits.writeto(g_m_fits,data=hdu_g[2].data,header=hdu_g[2].header,overwrite=True)
-                fits.writeto(b_t_fits,data=hdu_b[1].data,header=hdu_b[1].header,overwrite=True)
-                fits.writeto(b_m_fits,data=hdu_b[2].data,header=hdu_b[2].header,overwrite=True)
-
                 d.set("frame delete all")
                 d.set("tile yes")
                 d.set("rgb")
@@ -344,17 +329,20 @@ class Sersic():
                 d.set("rgb red")
                 d.set("scale linear")
                 d.set("scale mode 99.5")
-                d.set(f"fits {r_t_fits}")
+                d.set(f"mecube {rfile}")
+                d.set(f"cube 2")
                 d.set("scale limits "+rscale)
                 d.set("rgb green")
                 d.set("scale linear")
                 d.set("scale mode 99.5")
-                d.set(f"fits {g_t_fits}")
+                d.set(f"mecube {gfile}")
+                d.set(f"cube 2")
                 d.set("scale limits "+gscale)
                 d.set("rgb blue")
                 d.set("scale linear")
                 d.set("scale mode 99.5")
-                d.set(f"fits {b_t_fits}")
+                d.set(f"mecube {bfile}")
+                d.set(f"cube 2")
                 d.set("scale limits "+bscale)
                 d.set("rgb lock scale yes")
                 d.set("rgb lock colorbar yes")
@@ -366,30 +354,26 @@ class Sersic():
                 d.set("rgb red")
                 d.set("scale linear")
                 d.set("scale mode 99.5")
-                d.set(f"fits {r_m_fits}")
+                d.set(f"mecube {rfile}")
+                d.set(f"cube 3")
                 d.set("scale limits "+rscale)
                 d.set("rgb green")
                 d.set("scale linear")
                 d.set("scale mode 99.5")
-                d.set(f"fits {g_m_fits}")
+                d.set(f"mecube {gfile}")
+                d.set(f"cube 3")
                 d.set("scale limits "+gscale)
                 d.set("rgb blue")
                 d.set("scale linear")
                 d.set("scale mode 99.5")
-                d.set(f"fits {b_m_fits}")
+                d.set(f"mecube {bfile}")
+                d.set(f"cube 3")
                 d.set("scale limits "+bscale)
                 d.set("rgb lock scale yes")
                 d.set("rgb lock colorbar yes")
                 d.set("zoom to fit")
                 d.set("frame prev")
                 d.set("zoom to fit")
-
-                os.remove(r_t_fits)
-                os.remove(g_t_fits)
-                os.remove(b_t_fits)
-                os.remove(r_m_fits)
-                os.remove(g_m_fits)
-                os.remove(b_m_fits)
             else:
                 with open(self.ouput_dir + 'rgb_info.txt') as info_:
                     lines = info_.readlines()
