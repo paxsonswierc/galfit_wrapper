@@ -143,8 +143,8 @@ class Sersic():
                 self.remove_constraint()
             else:
                 if os.path.exists(self.constraint_file):
-                    use_exist_cst = input('\nUse existing constraint file? Hit enter for yes, type no to create new constaint file > ')
-                    if use_exist_cst == 'no':
+                    use_exist_cst = input('\nReplace current constraint? Hit enter to create new constraint, type no to use existing constraint > ')
+                    if use_exist_cst != 'no':
                         self.add_constraint()
             # Give option to add new regions
             input('\nAdd any new regions do NOT want to constrain. Hit enter to continue')
