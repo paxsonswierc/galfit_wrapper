@@ -146,6 +146,8 @@ class Sersic():
                     use_exist_cst = input('\nReplace current constraint? Hit enter to create new constraint, type no to use existing constraint > ')
                     if use_exist_cst != 'no':
                         self.add_constraint()
+                else:
+                    self.add_constraint()
             # Give option to add new regions
             input('\nAdd any new regions you do NOT want to constrain. Hit enter to continue')
             # Get regions
