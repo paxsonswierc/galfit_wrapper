@@ -147,7 +147,7 @@ class Sersic():
                     if use_exist_cst != 'no':
                         self.add_constraint()
             # Give option to add new regions
-            input('\nAdd any new regions do NOT want to constrain. Hit enter to continue')
+            input('\nAdd any new regions you do NOT want to constrain. Hit enter to continue')
             # Get regions
             regions = d.get("region")
             # Establish output files
