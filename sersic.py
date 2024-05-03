@@ -70,6 +70,7 @@ class Sersic():
         if self.psf.model_file is None:
             print('\nPlease create or upload psf first\n')
         else:
+            self.remove_constraint()
             # Open target in ds9
             d.set("fits new "+self.target_file)
             d.set("tile no")
