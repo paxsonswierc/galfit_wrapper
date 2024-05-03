@@ -70,7 +70,6 @@ class Sersic():
         if self.psf.model_file is None:
             print('\nPlease create or upload psf first\n')
         else:
-            self.remove_constraint()
             # Open target in ds9
             d.set("fits new "+self.target_file)
             d.set("tile no")
@@ -92,10 +91,11 @@ class Sersic():
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
             output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
             # Set galfit config file
-            if self.constraint_file is None:
-                constraint = 'none'
-            else:
-                constraint = self.constraint_file
+            constraint = 'none'
+            # if self.constraint_file is None:
+            #     constraint = 'none'
+            # else:
+            #     constraint = self.constraint_file
             input_to_galfit(self.target_file, False, regions, self.zero_point,
                             self.config_file, output_fits, output_mask,
                             self.psf.model_file, False, False, False, [0]*4,
