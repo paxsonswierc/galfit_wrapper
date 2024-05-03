@@ -138,7 +138,7 @@ class Sersic():
             # Constrained changes
             input('\nMake changes to existing regions and add any new regions you may want to constrain. Hit enter to continue')
             # Add constraint based on input
-            add_constraint = input('\nAdd/use existing constraint? Hit enter for yes, type no otherwise > ')
+            add_constraint = input('\nUse constraint? Hit enter for yes, type no otherwise > ')
             if add_constraint == 'no':
                 self.remove_constraint()
             else:
