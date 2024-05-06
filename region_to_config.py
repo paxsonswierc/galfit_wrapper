@@ -10,7 +10,7 @@ import math
 # function for fits file and regions -> galfit file, for both psf and normal galfit
 def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
                     mask_file, psf_file, pre_box, pre_mags, pre_psf_mags,
-                    sky_info, constraint_file):
+                    sky_info, constraint_file, bending):
     # creates lines for sky component
     def create_sky_component(component_number, fits_data, sky_info):
         if sky_info[3] == 0:
@@ -58,7 +58,7 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
         return "\n".join(component_lines)
     
     # creates lines for sersic component
-    def create_sersic_component(component_number, x, y, a, b, angle, magnitude, skip):
+    def create_sersic_component(component_number, x, y, a, b, angle, magnitude, skip, bend):
         component_lines = [ 
             f"# Component number: {component_number}",
             "0) sersic",
@@ -69,6 +69,7 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
             f"9) {b/a} 1",
             f"10) {(angle + 90) % 360} 1",
             f"Z) {skip}",
+            bend,
             "\n"
         ]
         return "\n".join(component_lines)
@@ -179,7 +180,11 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
                 sersic_count += 1
             else:
                 magnitude = (-2.5 * math.log10(sum_pixels)) + zeropoint
-            component_regions.append(create_sersic_component(component_number, x, y, a, b, angle, magnitude, skip))
+            bend = ' '
+            if (sersic_count+1) <= len(bending):
+                if bending[sersic_count] is not None:
+                    bend = bending[sersic_count]
+            component_regions.append(create_sersic_component(component_number, x, y, a, b, angle, magnitude, skip, bend))
             component_number += 1 
         elif region.name == 'circle':
             x, y, r = region.coord_list

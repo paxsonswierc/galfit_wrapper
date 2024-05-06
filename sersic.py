@@ -99,7 +99,7 @@ class Sersic():
             input_to_galfit(self.target_file, False, regions, self.zero_point,
                             self.config_file, output_fits, output_mask,
                             self.psf.model_file, False, False, False, [0]*4,
-                            constraint)
+                            constraint, [])
             # Get rid of regions
             d.set('region select all')
             d.set('region delete select')
@@ -127,13 +127,13 @@ class Sersic():
             d.set("scale mode 99.5")
             d.set("zoom to fit")
             d.set("mode region")
-            box, mags, psf_mags, sky_info = self.config_to_region(d)
+            box, mags, psf_mags, sky_info, bending = self.config_to_region(d)
             # Ask for manual edits first
             open_editor = input('\nWould you like to edit the config text file manually? Type yes or hit enter to skip > ')
             if open_editor == 'yes' or open_editor == 'y':
                 open_textfile(self.config_file)
-                # Load in regions
-                box, mags, psf_mags, sky_info = self.config_to_region(d)
+                # Load in regions again
+                box, mags, psf_mags, sky_info, bending = self.config_to_region(d)
 
             d.set("region shape ellipse")
             # Constrained changes
@@ -164,7 +164,7 @@ class Sersic():
             input_to_galfit(self.target_file, False, regions, self.zero_point,
                             self.config_file, output_fits, output_mask,
                             self.psf.model_file, box, mags, psf_mags, sky_info,
-                            constraint)
+                            constraint, bending)
             # Optimize with new config file
             self.optimize_config(d)
 
@@ -366,7 +366,7 @@ class Sersic():
             d.set("scale mode 99.5")
             d.set("zoom to fit")
             d.set("mode pan")
-            box, mags, psf_mags, sky_info = self.config_to_region(d)
+            box, mags, psf_mags, sky_info, bending = self.config_to_region(d)
 
     def visualize_rgb(self, rfile: str, gfile: str, bfile: str, single: bool, d) -> None:
         '''
@@ -498,7 +498,7 @@ class Sersic():
             if file != self.config_file:
                 shutil.copyfile(file, self.config_file)
             # Convert config to regions to get info on box size
-            box, mags, psf_mags, sky_info = self.config_to_region(d)
+            box, mags, psf_mags, sky_info, bending = self.config_to_region(d)
 
             regions = d.get("region")
             # Establish filenames
@@ -513,7 +513,7 @@ class Sersic():
             input_to_galfit(self.target_file, False, regions, self.zero_point,
                             self.config_file, output_fits, output_mask,
                             self.psf.model_file, box, mags, psf_mags, sky_info,
-                            constraint)
+                            constraint, bending)
 
     def upload_model(self, file: str) -> None:
         '''
@@ -567,6 +567,7 @@ class Sersic():
         # Keep track of magnitudes of all components
         magnitudes = []
         psf_magnitudes = []
+        bending = []
         sky_info = [0, 0, 0, 0]
         config = open(self.config_file, 'r')
         lines = config.readlines()
@@ -581,6 +582,7 @@ class Sersic():
                     number = lines[i-1].split()[3]
                 else:
                     number = ""
+                bend = False
                 for component_line in lines[i+1:]:
                     words = component_line.split()
                     if '1)' in component_line:
@@ -604,10 +606,16 @@ class Sersic():
                             angle -= 90
                         else:
                             angle += 90
+                    elif 'B2)' in component_line:
+                        bend = component_line
                     if '0)' in component_line or component_line == lines[-1]:
                         # Set ellipse region
                         reg_f.write(f"ellipse {x} {y} {a} {b} {angle} # text={{{number}}} color=#f82")
                         reg_f.write("\n")
+                        if bend:
+                            bending.append(bend)
+                        else:
+                            bending.append(None)
                         break
             # Check for psf component
             if '0) psf' in line:
@@ -663,7 +671,7 @@ class Sersic():
 
         config.close()
         return [x_min, x_max, y_min, y_max, x_center, y_center],\
-                magnitudes, psf_magnitudes, sky_info
+                magnitudes, psf_magnitudes, sky_info, bending
     
     def add_constraint(self) -> None:
         '''
