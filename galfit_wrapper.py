@@ -70,8 +70,8 @@ def take_action(action: str) -> None:
                'sersic v': sersic_visualize,
                'sv': sersic_visualize,
                'sersic visualize regions': sersic_visualize_regions,
+               'sersic vr': sersic_visualize_regions,
                'svr': sersic_visualize_regions,
-               'sv r': sersic_visualize_regions,
                'sersic visualize rgb': sersic_visualize_rgb,
                'sersic v rgb': sersic_visualize_rgb,
                'sv rgb': sersic_visualize_rgb,
@@ -149,7 +149,7 @@ def list_target():
             file_ = True
         if file == target_filename + '_psf_config.txt':
             psfc_ = True
-        if file == target_filename + '_psf.fits':
+        if file == target_filename + '_psf_model.fits':
             psf_ = True
         if file == target_filename + '_config.txt':
             c_ = True
@@ -163,7 +163,7 @@ def list_target():
     if psfc_:
         print('- '+get_time(target_filename + "_psf_config.txt")+'\t'+(target_filename + "_psf_config.txt")+'   '+'psf config')
     if psf_:
-        print('- '+get_time(target_filename + "_psf.fits")+'\t'+(target_filename + "_psf.fits")+'         '+'psf model FITS')
+        print('- '+get_time(target_filename + "_psf_model.fits")+'\t'+(target_filename + "_psf_model.fits")+'   '+'psf model FITS')
     if c_:
         print('- '+get_time(target_filename + "_config.txt")+'\t'+(target_filename + "_config.txt")+'       '+'model config')
     if cst_:
@@ -355,7 +355,7 @@ if __name__ == '__main__':
                     'sersic optimize config', 'sersic oc', 'soc',
                     'sersic produce config', 'sersic pc', 'spc',
                     'sersic visualize', 'sersic v', 'sv',
-                    'sersic visualize regions', 'svr', 'sv r',
+                    'sersic visualize regions', 'sersic vr', 'svr',
                     'sersic visualize rgb', 'sersic v rgb', 'sv rgb',
                     'sersic upload config', 'sersic uc', 'suc']
     # Reads in paths from local config file. If none, prompts user for them
