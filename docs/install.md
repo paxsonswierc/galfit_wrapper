@@ -12,6 +12,7 @@ how to clone, install, and run galfit_wrapper
  * [ds9](https://sites.google.com/cfa.harvard.edu/saoimageds9/download)
  * [galfit](https://users.obs.carnegiescience.edu/peng/work/galfit/galfit.html)
  * bash (for Unix)
+ * [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
  * [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) (for Windows)
  * [MobaXterm](https://mobaxterm.mobatek.net/) (optional; for Windows)
  * [anaconda](https://docs.anaconda.com/free/anaconda/install/) (optional)
