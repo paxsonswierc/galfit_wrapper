@@ -27,11 +27,11 @@ how to clone, install, and run galfit_wrapper
 
 in terminal (in MobaXterm for Windows), navigate using `cd` to convenient directory
 
-if using Anaconda, first do `conda create -n "<name>" python=3.10.0` then `conda activate <name>`  
-download all required python libraries while in the conda enviornment
-
 clone repository: `git clone https://github.com/paxsonswierc/galfit_wrapper.git`  
 to update repository: `git pull` in code directory
+
+if using Anaconda, first do `conda create -n "<name>" python=3.10.0` then `conda activate <name>`  
+download all required python libraries while in the conda enviornment
 
 <h3>FIRST RUN</h3>
 
