@@ -275,10 +275,10 @@ class Sersic():
             for region in regions:
                 if "background" in region.__dict__["attr"][0]:
                     reg_list.append(str(region.__dict__["attr"][1]["text"]))
-                    inc_list.append(1)
+                    inc_list.append(0)
                 else:
                     reg_list.append(str(region.__dict__["attr"][1]["text"]))                    
-                    inc_list.append(0)
+                    inc_list.append(1)
 
             with open(self.config_file, 'r') as config:
                 lines = config.readlines()
@@ -287,10 +287,10 @@ class Sersic():
                 for i, line in enumerate(lines):
                     if 'Component number:' in line and 'sky' not in lines[i+1]:
                         comp_num = str(int(line.split()[3]))
-                        in_comp = False
+                        in_comp = True
                     if in_comp and 'Z)' in line:
                         temp_lines.append(f"Z) {inc_list[reg_list.index(comp_num)]}")
-                        in_comp = True
+                        in_comp = False
                     else:
                         temp_lines.append(line)
 
