@@ -85,7 +85,7 @@ class Sersic():
             input('\nPlace point for point sources. Hit enter when region is placed')
             d.set("region shape box")
             input('\nPlace box for frame. Hit enter when region is placed')
-            regions = d.get("region")
+            regions = d.get("region -system image")
             # Establish filenames
             self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
@@ -152,7 +152,7 @@ class Sersic():
             # Give option to add new regions
             input('\nAdd any new regions you do NOT want to constrain. Hit enter to continue')
             # Get regions
-            regions = d.get("region")
+            regions = d.get("region -system image")
             # Establish output files
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
             output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
@@ -264,7 +264,7 @@ class Sersic():
             
             print('\nDO NOT edit/delete/add regions except for chaning source/background properties')
             input('\nChange regions\' properties to background to not include in model. Hit enter to continue')
-            regions = d.get("region")
+            regions = d.get("region -system image")
 
             # Establish output files
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
@@ -287,10 +287,10 @@ class Sersic():
                 for i, line in enumerate(lines):
                     if 'Component number:' in line and 'sky' not in lines[i+1]:
                         comp_num = str(int(line.split()[3]))
-                        in_comp = True
+                        in_comp = False
                     if in_comp and 'Z)' in line:
                         temp_lines.append(f"Z) {inc_list[reg_list.index(comp_num)]}")
-                        in_comp = False
+                        in_comp = True
                     else:
                         temp_lines.append(line)
 
@@ -500,7 +500,7 @@ class Sersic():
             # Convert config to regions to get info on box size
             box, mags, psf_mags, sky_info, bending = self.config_to_region(d)
 
-            regions = d.get("region")
+            regions = d.get("region -system image")
             # Establish filenames
             self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
@@ -666,7 +666,7 @@ class Sersic():
 
         # open regions, then delete temporary region file
         reg_f.close()
-        d.set("region "+self.ouput_dir+"temp_reg.reg")
+        d.set("region "+self.ouput_dir+"temp_reg.reg -system image")
         os.remove(self.ouput_dir+"temp_reg.reg") 
 
         config.close()
