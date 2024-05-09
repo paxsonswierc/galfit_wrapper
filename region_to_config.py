@@ -118,8 +118,6 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
     # parses regions from above
     regions = pyregion.parse(regions)
 
-
-
     # creates sky component
     component_regions.append(create_sky_component(component_number, fits_data, sky_info))
     component_number += 1
