@@ -143,7 +143,7 @@ class Sersic():
             if add_constraint == 'no':
                 self.remove_constraint()
             else:
-                if os.path.exists(self.constraint_file):
+                if self.constraint_file is not None and os.path.exists(self.constraint_file):
                     use_exist_cst = input('\nReplace current constraint? Hit enter to create new constraint, type no to use existing constraint > ')
                     if use_exist_cst != 'no':
                         self.add_constraint()
