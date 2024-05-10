@@ -12,6 +12,7 @@ how to clone, install, and run galfit_wrapper
  * [ds9](https://sites.google.com/cfa.harvard.edu/saoimageds9/download)
  * [galfit](https://users.obs.carnegiescience.edu/peng/work/galfit/galfit.html)
  * bash (for Unix)
+ * [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
  * [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) (for Windows)
  * [MobaXterm](https://mobaxterm.mobatek.net/) (optional; for Windows)
  * [anaconda](https://docs.anaconda.com/free/anaconda/install/) (optional)
@@ -26,11 +27,11 @@ how to clone, install, and run galfit_wrapper
 
 in terminal (in MobaXterm for Windows), navigate using `cd` to convenient directory
 
-if using Anaconda, first do `conda create -n "<name>" python=3.10.0` then `conda activate <name>`  
-download all required python libraries while in the conda enviornment
-
 clone repository: `git clone https://github.com/paxsonswierc/galfit_wrapper.git`  
 to update repository: `git pull` in code directory
+
+if using Anaconda, first do `conda create -n "<name>" python=3.10.0` then `conda activate <name>`  
+download all required python libraries while in the conda enviornment
 
 <h3>FIRST RUN</h3>
 

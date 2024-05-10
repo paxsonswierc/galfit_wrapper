@@ -67,7 +67,7 @@ class PSF():
         # Prompt user to place box region for area to run model
         d.set("region shape box")
         input('\nPlace box for frame. Hit enter when region is placed')
-        psf_regions = d.get("region")
+        psf_regions = d.get("region -system image")
         # Establish filenames
         output_config = self.ouput_dir + self.target_filename + '_psf_config.txt'
         output_fits = self.ouput_dir + self.target_filename + '_psf.fits'
@@ -76,7 +76,7 @@ class PSF():
         # Set galfit config file
         input_to_galfit(self.target_file, True, psf_regions, self.zero_point,
                         output_config, output_fits, output_mask, 'none',
-                        False, False, False, [0]*4, 'none')
+                        False, False, False, [0]*4, 'none', 'none')
         self.config_file = output_config
         # Delete old regions
         d.set('region select all')

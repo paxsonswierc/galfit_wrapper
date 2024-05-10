@@ -85,7 +85,7 @@ class Sersic():
             input('\nPlace point for point sources. Hit enter when region is placed')
             d.set("region shape box")
             input('\nPlace box for frame. Hit enter when region is placed')
-            regions = d.get("region")
+            regions = d.get("region -system image")
             # Establish filenames
             self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
@@ -143,7 +143,7 @@ class Sersic():
             if add_constraint == 'no':
                 self.remove_constraint()
             else:
-                if os.path.exists(self.constraint_file):
+                if self.constraint_file is not None and os.path.exists(self.constraint_file):
                     use_exist_cst = input('\nReplace current constraint? Hit enter to create new constraint, type no to use existing constraint > ')
                     if use_exist_cst != 'no':
                         self.add_constraint()
@@ -152,7 +152,7 @@ class Sersic():
             # Give option to add new regions
             input('\nAdd any new regions you do NOT want to constrain. Hit enter to continue')
             # Get regions
-            regions = d.get("region")
+            regions = d.get("region -system image")
             # Establish output files
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
             output_mask = self.ouput_dir + self.target_filename + '_mask.fits'
@@ -264,7 +264,7 @@ class Sersic():
             
             print('\nDO NOT edit/delete/add regions except for chaning source/background properties')
             input('\nChange regions\' properties to background to not include in model. Hit enter to continue')
-            regions = d.get("region")
+            regions = d.get("region -system image")
 
             # Establish output files
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
@@ -275,10 +275,10 @@ class Sersic():
             for region in regions:
                 if "background" in region.__dict__["attr"][0]:
                     reg_list.append(str(region.__dict__["attr"][1]["text"]))
-                    inc_list.append(1)
+                    inc_list.append(0)
                 else:
                     reg_list.append(str(region.__dict__["attr"][1]["text"]))                    
-                    inc_list.append(0)
+                    inc_list.append(1)
 
             with open(self.config_file, 'r') as config:
                 lines = config.readlines()
@@ -500,7 +500,7 @@ class Sersic():
             # Convert config to regions to get info on box size
             box, mags, psf_mags, sky_info, bending = self.config_to_region(d)
 
-            regions = d.get("region")
+            regions = d.get("region -system image")
             # Establish filenames
             self.config_file = self.ouput_dir + self.target_filename + '_config.txt'
             output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
@@ -666,7 +666,7 @@ class Sersic():
 
         # open regions, then delete temporary region file
         reg_f.close()
-        d.set("region "+self.ouput_dir+"temp_reg.reg")
+        d.set("region "+self.ouput_dir+"temp_reg.reg -system image")
         os.remove(self.ouput_dir+"temp_reg.reg") 
 
         config.close()
