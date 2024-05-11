@@ -2,6 +2,8 @@
 
 ![Python version](https://img.shields.io/badge/Python-3.10-green.svg?style=flat)
 
+# [Full docs here](https://paxsonswierc.github.io/galfit_wrapper_docs.io/)
+
 ## Current dependencies:
 
 System/Executables: 
@@ -39,11 +41,5 @@ Alternatively, you can just delete `path_config.txt` and galfit wrapper will ask
 again next time you run it.
 
 For a list of commands, type help into tui
-
-## Missing features in developement
-
-* Automatic pixel constraint file generation for all models
-* In terminal text editing option for config files
-* Better multi band support (rgb images, automatic propogation between bands, etc.)
 
 ### Feel free to log any crashes or bugs in issues! Reach out to authors for help at emails pswierc@uchicago.edu or babnigg@uchicago.edu, or on slack as Paxson or Daniel B

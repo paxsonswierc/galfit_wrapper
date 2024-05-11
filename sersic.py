@@ -131,7 +131,7 @@ class Sersic():
             d.set("mode region")
             box, mags, psf_mags, sky_info, bending = self.config_to_region(d)
             # Ask for manual edits first
-            open_editor = input('\nWould you like to edit the config text file manually? Type yes or hit enter to skip > ')
+            open_editor = input('\nWould you like to edit the config text file manually? Any removal of components should be done manually. Type yes or hit enter to skip > ')
             if open_editor == 'yes' or open_editor == 'y':
                 open_textfile(self.config_file)
                 # Load in regions again
