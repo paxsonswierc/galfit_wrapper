@@ -349,8 +349,6 @@ def sersic_calc_mag():
     '''
     Test function, uses include/exclude regions to sum a magnitude
     '''
-    if not os.path.exists(path_to_output + 'rgb_info.txt'):
-        print("\nRun target visualize rgb if you wish to use color image\n")
     sersic.calc_mag(d)
 
 if __name__ == '__main__':
