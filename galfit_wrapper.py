@@ -87,7 +87,8 @@ def take_action(action: str) -> None:
                'sersic upload constraint': sersic_upload_constraint,
                'sersic ucst': sersic_upload_constraint,
                'sucst': sersic_upload_constraint,
-               'mult fits': mult_fits}
+               'mult fits': mult_fits,
+               'calc mag': sersic_calc_mag}
     if action not in actions:
         print('\nUnkown command. Type help for assistance\n')
     else:
@@ -344,6 +345,14 @@ def mult_fits():
     data = data*10000
     fits.writeto(target_path, data, header, overwrite=True)
 
+def sersic_calc_mag():
+    '''
+    Test function, uses include/exclude regions to sum a magnitude
+    '''
+    if not os.path.exists(path_to_output + 'rgb_info.txt'):
+        print("\nRun target visualize rgb if you wish to use color image\n")
+    sersic.calc_mag(d)
+
 if __name__ == '__main__':
     # Commands that if called, trigger ds9 to open
     ds9_commands = ['target visualize', 'target v', 'tv',
@@ -357,7 +366,7 @@ if __name__ == '__main__':
                     'sersic visualize', 'sersic v', 'sv',
                     'sersic visualize regions', 'sersic vr', 'svr',
                     'sersic visualize rgb', 'sersic v rgb', 'sv rgb',
-                    'sersic upload config', 'sersic uc', 'suc']
+                    'sersic upload config', 'sersic uc', 'suc', 'calc mag']
     # Reads in paths from local config file. If none, prompts user for them
     path_to_galfit, path_to_output, galfit_output = get_paths()
 

@@ -2,6 +2,7 @@
 # Author: Paxson Swierc & Daniel Babnigg
 
 from astropy.io import fits
+import numpy as np
 import os
 from region_to_config import input_to_galfit
 from utils import open_textfile
@@ -40,6 +41,7 @@ class Sersic():
         add_constraint: creates a galfit constraint file
         remove_constraint: removes a galfit constraint file
         flags: prints flags from galfit model
+        calc_mag: secret function to calculate total magnitude based off header
     '''
     def __init__(self, filter: str, target_file: str, ouput_dir: str,
                  galfit_path: str, target_filename: str, zero_point: float,
@@ -805,3 +807,54 @@ class Sersic():
             for flag in galfit_flags:
                 print("-",flag_dict[flag])
             print()
+
+    def calc_mag(self,d) -> None:
+        '''
+        Allows user to include and exclude regions for a completed config/model file;
+        then reads the magnitudes from the output fits header to produce a summed magnitude
+
+        Args: None
+
+        Returns: Nothing
+        '''
+
+        if self.config_output_file is None:
+            print("\nPlease upload or create sersic model first\n")
+        else:
+            d.set("frame delete all")
+            if os.path.exists(self.ouput_dir + 'rgb_info.txt'):
+                r_file, g_file, b_file = open(self.ouput_dir + 'rgb_info.txt', 'r').read().splitlines()[:3]
+                self.visualize_rgb(r_file,g_file,b_file,True,d)
+            d.set("lock frame wcs")
+            self.config_to_region(d)
+            d.set("tile yes")
+            d.set("mode region")
+            
+            input('\nChange regions\' properties to exclude to not include in sum of magnitudes. Hit enter to continue')
+            regions = d.get("region -system image")
+            regions = pyregion.parse(regions)
+
+            reg_keys = []
+            inc_list = []
+            for region in regions:
+                reg_keys.append(str(region.__dict__["attr"][1]["text"])+"_MAG")
+                if region.__dict__['exclude']:
+                    inc_list.append(0)
+                else:
+                    inc_list.append(1)
+            
+            with fits.open(self.config_output_file) as fitsfile:
+                header = fitsfile[2].header
+                mags = []
+                for i,key in enumerate(reg_keys):
+                    if inc_list[i]==1:
+                        mags.append(float(header[key].split(' ',1)[0]))
+                mags = np.array(mags)
+
+                fluxes = np.power(10,mags*-0.4)
+                flux = np.sum(fluxes)
+                mag = -2.5*np.log10(flux)
+
+                print()
+                print(f"total magnitude: {mag:.6f}")
+                print()
