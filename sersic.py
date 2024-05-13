@@ -407,6 +407,9 @@ class Sersic():
             d.set("rgb lock colorbar yes")
             d.set("zoom to fit")
 
+            _ = input("Change scaling as you wish, then hit enter to save")
+            print()
+
             if len(open(self.ouput_dir + 'rgb_info.txt', 'r').read().splitlines()) == 3:
                 with open(self.ouput_dir + 'rgb_info.txt', 'a') as rgb_info:
                     rgb_info.write(str(rscale)+'\n')
