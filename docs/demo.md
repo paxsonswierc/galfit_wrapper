@@ -68,27 +68,27 @@ Once galfit runs, similar to PSF creation, it will display the 4-band model file
 
 ![3 edit](https://github.com/paxsonswierc/galfit_wrapper/blob/fbe8c042a48e782fa515815ec184c7e5e2f58468/example/pictures/14config_3_edit.png)
 
-Edit config steps
+I add a few new regions in this step. Because I am not including any consrtaints, it does not matter when I add the new regions. In this step, one can also move existing regions.
 
 ![out to 2](https://github.com/paxsonswierc/galfit_wrapper/blob/fbe8c042a48e782fa515815ec184c7e5e2f58468/example/pictures/15config_2.png)
 
-Happy with optimization, but want to add something, do 2
+I want to add something else with this residual image, but the optimization seemed to improve the image. So, I will do 2.
 
 ![2 edit](https://github.com/paxsonswierc/galfit_wrapper/blob/fbe8c042a48e782fa515815ec184c7e5e2f58468/example/pictures/16config_2_edit.png)
 
-Edit config steps
+I move around regions a bit, and add an exclude region on the top to make sure the extra galaxy does not interfere with the fit. Regions of any shape with the exclude region will be included in a mask file that will mask the areas out during optimization.
 
 ![out to 1](https://github.com/paxsonswierc/galfit_wrapper/blob/fbe8c042a48e782fa515815ec184c7e5e2f58468/example/pictures/17config_1.png)
 
-Happy with final model, save 1
+With the changes made, I am happy with the final model. I select 1 to save the output and the config. Note this is an example, and this model can probably get better!
 
 ![config outputs](https://github.com/paxsonswierc/galfit_wrapper/blob/fbe8c042a48e782fa515815ec184c7e5e2f58468/example/pictures/18after_config.png)
 
-Visualize model, view flags
+To visualize the 4-band output FITS, I can run `sersic visualize` which will blink through each of the frames. To view the flags that were printed during the galfit run, I can use `sersic flags` to have these flags printed out.
 
 ![one band done](https://github.com/paxsonswierc/galfit_wrapper/blob/fbe8c042a48e782fa515815ec184c7e5e2f58468/example/pictures/19oneband_done.png)
 
-Finished with one band - add constraint to be used for other bands, list all files created, use quit
+I am now finished with one band. Because I will be using this model for multiple bands, I produce a constraint file based on the best fit with `sersic add constraint` which creates constraints on every sersic and psf component - namely, a +/- 1 pixel shift, +/- 4 in magnitude, and +/- 10% for other relevant parameters. To see the main files created, one can run `target list`. When finished with an image, or when wanting to come back to an image, you can `quit` the program.
 
 <h3>MULTI-BAND PROPAGATION</h3>
 
