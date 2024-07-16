@@ -85,7 +85,7 @@ class PSF():
         if os.path.exists(output_fits):
                 os.remove(output_fits)
         # Run galfit
-        subprocess.run(['/bin/bash', '-c', str(self.galfit_path+' '+self.config_file)])
+        subprocess.run(['/bin/bash', '-c', str(self.galfit_path.rstrip()+' '+self.config_file)])
         # subprocess.run(['/bin/bash', '-c', self.galfit_path+" "+output_config])
         # Check if galfit ran correctly
         if os.path.exists(output_fits):

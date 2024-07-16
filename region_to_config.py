@@ -1,5 +1,5 @@
 # Function to convert a ds9 region to a config file
-# Author: Daniel Babnigg
+# Author: Daniel Babnigg & Others
 
 import pyregion
 from astropy.io import fits
