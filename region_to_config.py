@@ -24,7 +24,7 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
             f"1) {sky_level} 1",
             f"2) {sky_info[0]} {sky_info[2]}",
             f"3) {sky_info[1]} {sky_info[2]}",
-            "Z) 0",
+            "Z) 1",
             "\n"
         ]
         return '\n'.join(component_lines)

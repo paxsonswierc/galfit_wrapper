@@ -243,6 +243,78 @@ class Sersic():
                 else:
                     print('\nGalfit crashed. Please edit/remake config file and try again\n')
 
+    def optimize_config_(self, d) -> None:
+        '''
+        Optimizes a galfit model based on config file (TEMP COPY)
+
+        Args:
+            d: pyds9 DS9 instance
+        
+        Returns: Nothing
+        '''
+        if self.config_file is None:
+            print('\nPlease create or upload psf galfit config file first\n')
+        else:
+            config = open(self.config_file, 'r')
+            lines = config.readlines()
+            
+            comp_num = 0
+            comp_type = ""
+            for i, line in enumerate(lines):
+                # check for a line that contains the start of a component
+                if 'Component number:' in line:
+                    comp_num += 1
+                words = line.split()
+                # gets the component type (psf, sersic, sky, etc.)
+                if '0)' in line and '=0)' not in line and '10)' not in line:
+                    comp_type = words[1]
+                if comp_type == 'sky':
+                    if 'Z)' in line:
+                        lines[i] = "Z) 1\n"
+            config.close()
+            # Write update to config file
+            with open(self.config_file, 'w') as file:
+                file.writelines(lines)
+
+            # Get rid of any previous galfit output config files
+            if os.path.exists('galfit.01'):
+                os.remove('galfit.01')
+            # Final output file
+            output_fits = self.ouput_dir + self.target_filename + '_model_temp.fits'
+            # Remove any previous temporary model outputs
+            if os.path.exists(output_fits):
+                os.remove(output_fits)
+            # Run galfit
+            # subprocess.run(['/bin/bash', '-c', self.galfit_path+" "+self.config_file])
+            # print(str(self.galfit_path.rstrip()+' '+self.config_file))
+            subprocess.run(['/bin/bash', '-c', str(self.galfit_path.rstrip()+' '+self.config_file)])
+            print('\nFitting finished')
+            # Check if galfit was successful
+            if os.path.exists(output_fits) and os.path.exists('galfit.01'):
+                print("\ngalfit run done, loading into DS9...\n")
+                # Open output in ds9
+                d.set("mecube new " + output_fits)
+                d.set("tile no")
+                d.set("cmap 1 0.5")
+                d.set("scale mode minmax")
+                d.set("mode none")
+                d.set("zoom to fit")
+                d.set("cube play")
+
+                # Replace this config with galfit output config
+                os.remove(self.config_file)
+                shutil.copyfile('galfit.01', self.config_file)
+                os.remove('galfit.01')
+                # save the model
+                output_fits_final = self.ouput_dir + self.target_filename + '_model.fits'
+                os.rename(output_fits, output_fits_final)
+                self.config_output_file = output_fits_final
+            else:
+                if os.path.exists(output_fits):
+                    print('\nCorrupted output. Check for buffer overflow.\nMay have to do with output directory path or target fits file path being too long\n')
+                else:
+                    print('\nGalfit crashed. Please edit/remake config file and try again\n')
+
     def produce_config(self, d) -> None:
         '''
         Produces a galfit model based on config file using -o2 flag; no optimization
@@ -392,23 +464,26 @@ class Sersic():
             d.set("scale linear")
             d.set("scale mode 99.5")
             d.set(f"fits {rfile}")
-            rscale = d.get("scale limits")
             d.set("rgb green")
             d.set("scale linear")
             d.set("scale mode 99.5")
             d.set(f"fits {gfile}")
-            gscale = d.get("scale limits")
             d.set("rgb blue")
             d.set("scale linear")
             d.set("scale mode 99.5")
             d.set(f"fits {bfile}")
-            bscale = d.get("scale limits")
             d.set("rgb lock scale yes")
             d.set("rgb lock colorbar yes")
             d.set("zoom to fit")
 
-            _ = input("Change scaling as you wish, then hit enter to save")
-            print()
+            # _ = input("Change scaling as you wish, then hit enter to save")
+            # print()
+
+            bscale = d.get("scale limits")
+            d.set("rgb green")            
+            gscale = d.get("scale limits")
+            d.set("rgb red")
+            rscale = d.get("scale limits")
 
             if len(open(self.ouput_dir + 'rgb_info.txt', 'r').read().splitlines()) == 3:
                 with open(self.ouput_dir + 'rgb_info.txt', 'a') as rgb_info:

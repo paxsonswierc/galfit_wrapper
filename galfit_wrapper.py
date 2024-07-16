@@ -88,7 +88,9 @@ def take_action(action: str) -> None:
                'sersic ucst': sersic_upload_constraint,
                'sucst': sersic_upload_constraint,
                'mult fits': mult_fits,
-               'calc mag': sersic_calc_mag}
+               'calc mag': sersic_calc_mag,
+               'sersic redo psf': sersic_redo_psf,
+               'srp': sersic_redo_psf}
     if action not in actions:
         print('\nUnkown command. Type help for assistance\n')
     else:
@@ -351,6 +353,16 @@ def sersic_calc_mag():
     '''
     sersic.calc_mag(d)
 
+def sersic_redo_psf():
+    '''
+    TEST function, used for old files that were run with Z=0 sky components
+    Changes to Z=1 for both, redo PSF, then rerun model
+    '''
+    psf.optimize_config_(d)
+    print("PSF RE-OPTIMIZATION DONE")
+    sersic.optimize_config_(d)
+    print("DONE")
+
 if __name__ == '__main__':
     # Commands that if called, trigger ds9 to open
     ds9_commands = ['target visualize', 'target v', 'tv',
@@ -364,7 +376,8 @@ if __name__ == '__main__':
                     'sersic visualize', 'sersic v', 'sv',
                     'sersic visualize regions', 'sersic vr', 'svr',
                     'sersic visualize rgb', 'sersic v rgb', 'sv rgb',
-                    'sersic upload config', 'sersic uc', 'suc', 'calc mag']
+                    'sersic upload config', 'sersic uc', 'suc', 'calc mag',
+                    'sersic redo psf', 'srp']
     # Reads in paths from local config file. If none, prompts user for them
     path_to_galfit, path_to_output, galfit_output = get_paths()
 

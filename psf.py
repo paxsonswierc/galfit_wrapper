@@ -119,6 +119,81 @@ class PSF():
         else:
             print('\nGalfit crashed! Please try again\n')
 
+    def optimize_config_(self, d) -> None:
+        '''
+        Optimizes a galfit model based on config file (TEMP COPY)
+
+        Args:
+            d: pyds9 DS9 instance
+        
+        Returns: Nothing
+        '''
+        if self.config_file is None:
+            print('\nPlease create or upload psf galfit config file first\n')
+        else:
+            config = open(self.config_file, 'r')
+            lines = config.readlines()
+            
+            comp_num = 0
+            comp_type = ""
+            for i, line in enumerate(lines):
+                # check for a line that contains the start of a component
+                if 'Component number:' in line:
+                    comp_num += 1
+                words = line.split()
+                # gets the component type (psf, sersic, sky, etc.)
+                if '0)' in line and '=0)' not in line and '10)' not in line:
+                    comp_type = words[1]
+                if comp_type == 'sky':
+                    if 'Z)' in line:
+                        lines[i] = "Z) 1\n"
+            config.close()
+            # Write update to config file
+            with open(self.config_file, 'w') as file:
+                file.writelines(lines)
+
+            # Get rid of any previous galfit output config files
+            if os.path.exists('galfit.01'):
+                os.remove('galfit.01')
+            # Final output file
+            output_fits = self.ouput_dir + self.target_filename + '_psf.fits'
+            output_config = self.ouput_dir + self.target_filename + '_psf_config.txt'
+            output_model = self.ouput_dir + self.target_filename + '_psf_model.fits'
+            # Remove any previous temporary model outputs
+            if os.path.exists(output_fits):
+                os.remove(output_fits)
+            # Run galfit
+            # subprocess.run(['/bin/bash', '-c', self.galfit_path+" "+self.config_file])
+            # print(str(self.galfit_path.rstrip()+' '+self.config_file))
+            subprocess.run(['/bin/bash', '-c', str(self.galfit_path.rstrip()+' '+self.config_file)])
+            print('\nFitting finished')
+            # Check if galfit was successful
+            if os.path.exists(output_fits) and os.path.exists('galfit.01'):
+                print("\ngalfit run done, loading into DS9...\n")
+                # Open output in ds9
+                d.set("mecube new " + output_fits)
+                d.set("tile no")
+                d.set("cmap 1 0.5")
+                d.set("scale mode minmax")
+                d.set("mode none")
+                d.set("zoom to fit")
+                d.set("cube play")
+
+                # Save changes as long as user did not quit out
+                self.config_file = output_config
+                self.config_output_file = output_fits
+
+                hdul = fits.open(output_fits)
+                data = hdul[2].data
+                fits.writeto(output_model, data, overwrite=True)
+
+                self.model_file = output_model
+            else:
+                if os.path.exists(output_fits):
+                    print('\nCorrupted output. Check for buffer overflow.\nMay have to do with output directory path or target fits file path being too long\n')
+                else:
+                    print('\nGalfit crashed. Please edit/remake config file and try again\n')
+
     def visualize(self, d) -> None:
         '''
         Visualizes psf model using ds9. Will prioritize showing full 4 frames
