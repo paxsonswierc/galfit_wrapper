@@ -14,7 +14,7 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
     # creates lines for sky component
     def create_sky_component(component_number, fits_data, sky_info):
         if sky_info[3] == 0:
-            sky_level = np.median(fits_data)
+            sky_level = np.percentile(fits_data,30)
         else:
             sky_level = sky_info[3]
 
@@ -118,10 +118,6 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
     # parses regions from above
     regions = pyregion.parse(regions)
 
-    # creates sky component
-    component_regions.append(create_sky_component(component_number, fits_data, sky_info))
-    component_number += 1
-
     sersic_count = 0
     psf_count = 0
     for region in regions:
@@ -198,6 +194,12 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
             component_number += 1
         else:
             print(region,"will be ignored")
+
+    # creates sky component
+    print([int(i) for i in info_lines[0].split()[1:]])
+    xmin,xmax,ymin,ymax = [int(i) for i in info_lines[0].split()[1:]]
+    component_regions.append(create_sky_component(component_number, fits_data[ymin:ymax,xmin:xmax], sky_info))
+    component_number += 1
 
     # create mask and mask file
     excluded_regions_mask = np.ma.masked_greater(excluded_regions_mask,0).filled(1)
