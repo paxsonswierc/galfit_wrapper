@@ -688,7 +688,7 @@ class Sersic():
                             angle += 90
                     elif 'B2)' in component_line:
                         bend = component_line
-                    if '0)' in component_line or component_line == lines[-1]:
+                    if ('0)' in component_line and '10)' not in component_line) or component_line == lines[-1]:
                         # Set ellipse region
                         reg_f.write(f"ellipse {x} {y} {a} {b} {angle} # text={{{number}}} color=#f82")
                         reg_f.write("\n")
