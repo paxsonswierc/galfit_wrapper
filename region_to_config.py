@@ -110,6 +110,7 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
         ]
 
     # declares fitting region if box region is given
+    regions = pyregion.parse(regions)
     for region in regions:
         if region.name == 'box':
             cx, cy, x, y, _ = region.coord_list
@@ -136,9 +137,6 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
     xmin,xmax,ymin,ymax = [int(i) for i in info_lines[0].split()[1:]]
     component_regions.append(create_sky_component(component_number, fits_data[ymin:ymax,xmin:xmax], sky_info))
     component_number += 1
-
-    # parses regions from above
-    regions = pyregion.parse(regions)
 
     sersic_count = 0
     psf_count = 0
