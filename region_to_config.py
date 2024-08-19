@@ -182,9 +182,8 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
             else:
                 magnitude = (-2.5 * math.log10(sum_pixels)) + zeropoint
             bend = ' '
-            if (sersic_count) <= len(bending):
-                if bending[sersic_count-1] is not None:
-                    bend = bending[sersic_count-1]
+            if bending and (sersic_count) <= len(bending) and bending[sersic_count-1] is not None:
+                bend = bending[sersic_count-1]
             component_regions.append(create_sersic_component(component_number, x, y, a, b, angle, magnitude, skip, bend))
             component_number += 1 
         elif region.name == 'circle':
