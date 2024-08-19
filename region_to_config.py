@@ -109,32 +109,9 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
             "\n"
         ]
 
-    # initializes the components and masks
-    component_regions = []
-    excluded_regions_mask = np.zeros(fits_data.shape)
-    small_regions_mask_mag = np.zeros(fits_data.shape)
-    component_number = 1
-
-    # creates sky component
-    if pre_box:
-        xmin,xmax,ymin,ymax = pre_box[0],pre_box[1],pre_box[2],pre_box[3]
-    else:
-        xmin,xmax,ymin,ymax = int(np.round(cx-x/2)),int(np.round(cx+x/2)),int(np.round(cy-y/2)),int(np.round(cy+y/2))
-    # print([int(i) for i in info_lines[0].split()[1:]])
-    # xmin,xmax,ymin,ymax = [int(i) for i in info_lines[0].split()[1:]]
-    component_regions.append(create_sky_component(component_number, fits_data[ymin:ymax,xmin:xmax], sky_info))
-    component_number += 1
-
-    # parses regions from above
-    regions = pyregion.parse(regions)
-
-    sersic_count = 0
-    psf_count = 0
+    # declares fitting region if box region is given
     for region in regions:
-        if region.__dict__['exclude']:
-            region.__dict__['exclude'] = False
-            excluded_regions_mask += pyregion.get_mask([region], fits_data).astype(int)
-        elif region.name == 'box':
+        if region.name == 'box':
             cx, cy, x, y, _ = region.coord_list
             xmin,xmax,ymin,ymax = int(np.round(cx-x/2)),int(np.round(cx+x/2)),int(np.round(cy-y/2)),int(np.round(cy+y/2))
             ps_x,ps_y = 3600*astropy.wcs.utils.proj_plane_pixel_scales(astropy.wcs.WCS(fits_file))[0:2]
@@ -147,6 +124,28 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
                 "P) 0",
                 "\n"
             ]
+
+    # initializes the components and masks
+    component_regions = []
+    excluded_regions_mask = np.zeros(fits_data.shape)
+    small_regions_mask_mag = np.zeros(fits_data.shape)
+    component_number = 1
+
+    # creates sky component
+    print([int(i) for i in info_lines[0].split()[1:]])
+    xmin,xmax,ymin,ymax = [int(i) for i in info_lines[0].split()[1:]]
+    component_regions.append(create_sky_component(component_number, fits_data[ymin:ymax,xmin:xmax], sky_info))
+    component_number += 1
+
+    # parses regions from above
+    regions = pyregion.parse(regions)
+
+    sersic_count = 0
+    psf_count = 0
+    for region in regions:
+        if region.__dict__['exclude']:
+            region.__dict__['exclude'] = False
+            excluded_regions_mask += pyregion.get_mask([region], fits_data).astype(int)
         elif region.name == 'point':
             x, y = region.coord_list
             if "background" in region.__dict__["attr"][0]:
