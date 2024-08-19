@@ -117,9 +117,9 @@ def input_to_galfit(fits_file, psf, regions, zpt, output_file, output_fits,
 
     # creates sky component
     if pre_box:
-        xmin,xmax,ymin,ymax = int(np.round(cx-x/2)),int(np.round(cx+x/2)),int(np.round(cy-y/2)),int(np.round(cy+y/2))
-    else:
         xmin,xmax,ymin,ymax = pre_box[0],pre_box[1],pre_box[2],pre_box[3]
+    else:
+        xmin,xmax,ymin,ymax = int(np.round(cx-x/2)),int(np.round(cx+x/2)),int(np.round(cy-y/2)),int(np.round(cy+y/2))
     # print([int(i) for i in info_lines[0].split()[1:]])
     # xmin,xmax,ymin,ymax = [int(i) for i in info_lines[0].split()[1:]]
     component_regions.append(create_sky_component(component_number, fits_data[ymin:ymax,xmin:xmax], sky_info))
