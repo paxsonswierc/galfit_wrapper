@@ -6,6 +6,7 @@ from tkinter.filedialog import askopenfilename
 from tkinter import Tk
 from tkinter import filedialog
 import os
+import sys
 
 def write_path_config() -> None:
     '''
@@ -23,6 +24,9 @@ def get_paths() -> tuple[str, str, str]:
     '''
     Reads in paths from path_config.txt
     '''
+    if not os.path.exists('galfit_wrapper.py'):
+        print("you must run galfit wrapper from the dircetory that contains the galfit_wrapper.py file.")
+        sys.exit()
     if not os.path.exists('path_config.txt'):
         paths_file = open('path_config.txt', 'w')
         paths_file.close()
