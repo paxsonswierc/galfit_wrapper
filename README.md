@@ -20,8 +20,8 @@ Python libraries:
 
 ## Running galfit wrapper
 
-Download code into directory of your choice. cd into the directory and run the following. Note that currently,
-you must run `galfit_wrapper.py` from inside the directory containing the code or it may break.
+Download code into directory of your choice. cd into the directory and run the following. **Note that currently,
+you must run `galfit_wrapper.py` from inside the directory containing the code or it will break.**
 ```
 $ python3 galfit_wrapper.py
 ```
